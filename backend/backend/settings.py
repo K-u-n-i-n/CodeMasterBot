@@ -18,7 +18,10 @@ TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_FAKE_TOKEN = os.getenv('TELEGRAM_FAKE_TOKEN')
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-# ALLOWED_HOSTS = ['*']
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://codemasterbot.ddns.net',
+]
 
 
 # Application definition
