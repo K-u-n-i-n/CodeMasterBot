@@ -1,0 +1,52 @@
+version: '3.8'
+
+volumes:
+  postgresql_volume:
+  static_volume:
+  media_volume:
+
+services:
+
+  db:
+    image: postgres:latest
+    container_name: proj_db
+    restart: unless-stopped
+    volumes:
+      - postgresql_volume:/var/lib/postgresql/data/    
+    env_file:
+      - ./.env
+  wsgi:
+    image: kuninav/masterbot_backend
+    container_name: proj_wsgi
+    restart: always
+    command: gunicorn backend.wsgi:application --bind 0.0.0.0:8000
+    volumes:    
+      - ./data:/app/data
+      - static_volume:/app/static
+      - media_volume:/app/media    
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+    
+  bot:
+    image: kuninav/masterbot_bot
+    container_name: proj_bot
+    restart: always
+    command: python manage.py start_bot    
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+
+  nginx:
+    image: kuninav/masterbot_nginx
+    container_name: proj_nginx
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_volume:/app/static
+      - media_volume:/app/media
+    ports:
+      - 8000:80
+    depends_on:
+      - wsgi

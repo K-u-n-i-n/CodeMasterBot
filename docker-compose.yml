@@ -1,0 +1,67 @@
+version: '3.8'
+
+volumes:
+  postgresql_volume:
+  static_volume:
+  media_volume:
+
+services:
+
+  db:
+    image: postgres:latest
+    container_name: proj_db
+    restart: unless-stopped
+    volumes:
+      - postgresql_volume:/var/lib/postgresql/data/
+    ports:
+      - "5435:5432"
+    env_file:
+      - ./.env
+  wsgi:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+    container_name: proj_wsgi
+    restart: always
+    command: gunicorn backend.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+      - ./data:/app/data
+      - static_volume:/app/static
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+    
+  bot:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+    container_name: proj_bot
+    restart: always
+    command: python manage.py start_bot
+    volumes:
+      - ./backend:/app
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+
+  nginx:
+    image: nginx:latest
+    container_name: proj_nginx
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_volume:/app/static
+      - media_volume:/app/media
+    ports:
+      - "80:80"
+    depends_on:
+      - wsgi
