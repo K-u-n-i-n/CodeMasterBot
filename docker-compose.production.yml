@@ -1,5 +1,3 @@
-version: '3.8'
-
 volumes:
   postgresql_volume:
   static_volume:
