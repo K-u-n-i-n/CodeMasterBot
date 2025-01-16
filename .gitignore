@@ -152,5 +152,4 @@ posts/static/
 media/
 
 # прочее
-questions.csv
 questions_prod.csv
