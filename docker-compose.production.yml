@@ -36,6 +36,9 @@ services:
       - ./.env
     depends_on:
       - db
+      - wsgi
+    ports:
+      - "8443:8443"
 
   nginx:
     image: kuninav/masterbot_nginx
