@@ -23,6 +23,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://codemasterbot.ddns.net',
 ]
 
+WEBHOOK_URL = os.getenv('WEBHOOK_URL')
 
 # Application definition
 

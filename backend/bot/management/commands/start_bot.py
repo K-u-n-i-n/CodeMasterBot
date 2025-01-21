@@ -2,13 +2,14 @@
 Запуск бота и добавление обработчиков и задач.
 """
 
+import asyncio
 import logging
+
 from datetime import time
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from telegram.ext import (
-    ApplicationBuilder,
     CommandHandler,
     MessageHandler,
     CallbackQueryHandler,
@@ -16,6 +17,7 @@ from telegram.ext import (
 )
 
 from bot.handlers import handlers, utils, commands
+from bot.init import get_bot_application
 
 
 logging.basicConfig(
@@ -28,7 +30,7 @@ class Command(BaseCommand):
     help = 'Запуск бота.'
 
     def handle(self, *args, **kwargs):
-        application = ApplicationBuilder().token(settings.TELEGRAM_TOKEN).build()
+        application = get_bot_application()
 
         # Обработчики команд
         application.add_handler(CommandHandler('start', commands.start))
@@ -78,4 +80,25 @@ class Command(BaseCommand):
             name='daily_task'
         )
 
-        application.run_polling()
+        # # Запуск Polling, если не используется Webhook
+        # async def delete_webhook():  # Функция для удаления Webhook
+        #     await application.bot.delete_webhook()
+        #     logging.info("Webhook удален!")
+
+        # application.run_polling()
+
+        # Код для запуска бота в режиме Webhook
+        async def set_webhook():  # Функция для установки Webhook
+            await application.bot.set_webhook(settings.WEBHOOK_URL)
+            logging.info(f"Webhook установлен на {settings.WEBHOOK_URL}")
+
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        # Устанавливаем Webhook перед запуском
+        loop.run_until_complete(set_webhook())
+
+        application.run_webhook(
+            listen='0.0.0.0',
+            port=8443,
+            webhook_url=settings.WEBHOOK_URL
+        )
