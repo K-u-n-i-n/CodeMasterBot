@@ -1,14 +1,14 @@
 """
 Запуск бота и добавление обработчиков и задач.
 """
-
 import asyncio
 import logging
+import os
 
+from dotenv import load_dotenv
 from datetime import time
 
 from django.core.management.base import BaseCommand
-from django.conf import settings
 from telegram.ext import (
     CommandHandler,
     MessageHandler,
@@ -19,6 +19,10 @@ from telegram.ext import (
 from bot.handlers import handlers, utils, commands
 from bot.init import get_bot_application
 
+
+load_dotenv()
+
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -89,8 +93,8 @@ class Command(BaseCommand):
 
         # Код для запуска бота в режиме Webhook
         async def set_webhook():  # Функция для установки Webhook
-            await application.bot.set_webhook(settings.WEBHOOK_URL)
-            logging.info(f"Webhook установлен на {settings.WEBHOOK_URL}")
+            await application.bot.set_webhook(WEBHOOK_URL)
+            logging.info(f"Webhook установлен на {WEBHOOK_URL}")
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
@@ -100,5 +104,5 @@ class Command(BaseCommand):
         application.run_webhook(
             listen='0.0.0.0',
             port=8443,
-            webhook_url=settings.WEBHOOK_URL
+            webhook_url=WEBHOOK_URL
         )
