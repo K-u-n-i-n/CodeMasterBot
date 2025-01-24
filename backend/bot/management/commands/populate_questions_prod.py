@@ -7,11 +7,11 @@ from bot.models import Question, Tag
 
 
 class Command(BaseCommand):
-    help = 'Заполняет таблицу Question данными из файла questions.csv'
+    help = 'Заполняет таблицу Question данными из файла questions_prod.csv'
 
     def handle(self, *args, **kwargs):
         # Указываем путь к файлу
-        file_path = os.path.join('data', 'questions.csv')
+        file_path = os.path.join('data', 'questions_prod.csv')
 
         # Проверяем существование файла
         if not os.path.exists(file_path):
