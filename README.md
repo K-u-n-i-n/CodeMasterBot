@@ -65,6 +65,7 @@
 
 ## Развертывание на локальном сервере в режиме: Webhook
 - [Зарегистрируйте Telegram бота](https://vc.ru/telegram/1552569-kak-sozdat-zaregistrirovat-telegram-bota)
+- Узнайте ID своего телеграм-аккаунта. Необходимо для настройки оповещений (можно использовать для этого [бота](https://t.me/userinfobot))
 - Создайте файл .env в корне проекта. Шаблон для заполнения файла находится в .env.example
 - Установите [Docker](https://docs.docker.com/engine/install/) и [docker-compose](https://docs.docker.com/compose/install/) 
 - [Зарегистрируйтесь](https://dashboard.ngrok.com/get-started/setup/) и установите ngrok (если вы из России, то будут трудности...)
