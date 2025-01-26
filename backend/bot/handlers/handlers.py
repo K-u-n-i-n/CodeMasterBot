@@ -78,7 +78,7 @@ async def handle_help_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if query:
         await query.answer()
         await query.edit_message_text(
-            text='Тут будет ссылка на github проекта.'
+            text='Подробнее о боте: https://github.com/K-u-n-i-n/CodeMasterBot'
         )
 
 
