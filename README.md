@@ -1,4 +1,4 @@
-# CodeMasterBot
+# 🤖 CodeMasterBot
 
 Этот проект представляет собой Telegram-бота, работающего в режиме Webhook.  
 Бот написан на Python с использованием библиотеки [python-telegram-bot](https://docs.python-telegram-bot.org/en/v21.7/)  
