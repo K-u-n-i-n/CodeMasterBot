@@ -20,7 +20,6 @@ from .keyboards import (
     config_keyboard,
     complexity_keyboard,
     topic_keyboard,
-    next_keyboard,
     notification_keyboard
 )
 
@@ -71,84 +70,102 @@ async def handle_notifications_settings(update: Update, context: ContextTypes.DE
         )
 
 
-async def handle_help_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Обрабатывает запрос информации о боте"""
-
-    query = update.callback_query
-    if query:
-        await query.answer()
-        await query.edit_message_text(
-            text='Подробнее о боте: https://github.com/K-u-n-i-n/CodeMasterBot'
-        )
+def get_next_question(context):
+    """Получает вопрос, удаляет его из списка и возвращает оставшееся количество вопросов."""
+    questions = context.user_data.get('quiz_questions', [])
+    if questions:
+        next_question = questions.pop(0)
+        context.user_data['quiz_questions'] = questions
+        return next_question
+    return None
 
 
 async def handle_quiz_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Начало викторины."""
-    if update.message:
-        queryset = Question.objects.filter(tags__slug='func')
-        random_questions = await get_random_questions(queryset, 10)
+    if not update.message:
+        return
 
-        if not random_questions:
-            await update.message.reply_text('К сожалению, вопросов нет.')
-            return
+    random_questions = await get_random_questions_by_tag(10, tag_slug='func')
+    if not random_questions:
+        await send_no_questions_message(update)
+        return
 
-        context.user_data['quiz_questions'] = random_questions
-        context.user_data['current_question'] = None
-        context.user_data['used_names'] = [q.name for q in random_questions]
+    await prepare_quiz_context(context, random_questions)
 
-        await ask_next_question(update, context)
+    next_question = await get_next_question_from_context(context)
+    if not next_question:
+        await send_error_message(update)
+        return
+
+    await ask_next_question(update, context)
+
+
+async def get_random_questions_by_tag(count: int, tag_slug: str):
+    """Получает случайные вопросы по указанному тегу."""
+    queryset = Question.objects.filter(tags__slug=tag_slug)
+    return await get_random_questions(queryset, count)
+
+
+async def send_no_questions_message(update: Update):
+    """Отправляет сообщение о том, что вопросов нет."""
+    await update.message.reply_text('К сожалению, вопросов нет.')
+
+
+async def prepare_quiz_context(context: ContextTypes.DEFAULT_TYPE, questions: list[Question]):
+    """Сохраняет данные викторины в user_data."""
+    context.user_data['quiz_questions'] = questions
+    context.user_data['used_names'] = [q.name for q in questions]
+
+
+async def get_next_question_from_context(context: ContextTypes.DEFAULT_TYPE):
+    """Извлекает следующий вопрос из контекста."""
+    next_question = get_next_question(context)
+    if next_question:
+        context.user_data['current_question'] = next_question
+    return next_question
+
+
+async def send_error_message(update: Update):
+    """Отправляет сообщение об ошибке."""
+    await update.message.reply_text('Что-то пошло не так. Вопросы отсутствуют.')
 
 
 async def ask_next_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Вывод следующего вопроса с вариантами ответа."""
+    """Вывод вопроса с вариантами ответа."""
 
-    logging.info('Начинаем задавать следующий вопрос')
-    questions = context.user_data.get('quiz_questions', [])
-    logging.info(f'Осталось вопросов: {len(questions)}')
-
-    if not questions:
-        message = update.message or update.callback_query.message
-        if message:
-            await message.reply_text('💥 Викторина завершена!')
-            # Здесь нужно реализовать функцию подсчета правильных ответов
-        context.user_data.clear()
+    current_question = context.user_data.get('current_question')
+    if not current_question:
+        logging.warning('Попытка задать вопрос, но вопрос не найден.')
         return
 
-    # Берем текущий вопрос
-    current_question = questions.pop(0)
-    context.user_data['current_question'] = current_question
-    context.user_data['quiz_questions'] = questions
-    logging.info(f'Текущий вопрос: {current_question.description}')
-
-    # Получаем случайные варианты ответа
     all_names = await get_all_names_except(current_question.id)
-    logging.info(f'Всего доступных имен для ответа: {len(all_names)}')
     incorrect_answers = random.sample(all_names, k=min(3, len(all_names)))
     options = [current_question.name] + incorrect_answers
     random.shuffle(options)
 
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton(option, callback_data=option)] for option in options
+    ] + [
+        [InlineKeyboardButton('⛔ Завершить викторину ⛔', callback_data='end')]
     ])
-    logging.info('Клавиатура сформирована')
+
+    remaining_questions = len(context.user_data.get('quiz_questions', []))
 
     message = update.message or update.callback_query.message
     if message:
         await message.reply_text(
             text=(
+                f'Осталось вопросов: {remaining_questions}\n\n'
                 f'Описание функции:\n\n'
-                f'{current_question.description}\n\nВыберите правильный ответ:'
+                f'{current_question.description}\n\n'
+                f'Выберите правильный ответ:'
             ),
             reply_markup=keyboard,
         )
-        logging.info('Вопрос отправлен пользователю.')
-    else:
-        logging.warning('Вопрос не отправлен.')
 
 
 async def handle_question_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработка ответа пользователя на текущий вопрос."""
-
     query = update.callback_query
     await query.answer()
 
@@ -158,13 +175,10 @@ async def handle_question_answer(update: Update, context: ContextTypes.DEFAULT_T
         return
 
     user_answer = query.data  # Ответ пользователя из callback_data
-    questions = context.user_data.get('quiz_questions', [])
 
-    # Проверяем, правильный ли ответ
     if user_answer == current_question.name:
         text = (
             f'✅ Правильно! Отличная работа!\n\n'
-            f'Осталось вопросов: {len(questions)}\n\n'
             f'Название функции: {current_question.name}\n\n'
             f'Описание функции:\n{current_question.description}\n\n'
             f'Синтаксис:\n{current_question.syntax}'
@@ -172,7 +186,6 @@ async def handle_question_answer(update: Update, context: ContextTypes.DEFAULT_T
     else:
         text = (
             f'❌ Неправильно.\n\n'
-            f'Осталось вопросов: {len(questions)}\n\n'
             f'Ваш ответ: {user_answer}\n'
             f'Правильный ответ: {current_question.name}\n\n'
             f'Описание функции:\n{current_question.description}\n\n'
@@ -181,27 +194,30 @@ async def handle_question_answer(update: Update, context: ContextTypes.DEFAULT_T
 
     await query.edit_message_text(text)
 
-    await query.message.reply_text(
-        text='Что вы хотите сделать дальше?',
-        reply_markup=next_keyboard,
-    )
+    await handle_next_step(update, context)
 
 
-async def handle_next_or_end(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Обработка кнопок 'Далее' и 'Завершить викторину'."""
+async def handle_next_step(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Определяет следующий шаг: завершение викторины или показ следующего вопроса."""
+    next_question = get_next_question(context)
+
+    if next_question:
+        # Если остались вопросы, задаем следующий
+        context.user_data['current_question'] = next_question
+        await ask_next_question(update, context)
+    else:
+        await (update.message or update.callback_query.message).reply_text('Викторина завершена. Спасибо за участие! 👋')
+        context.user_data.clear()
+
+
+async def handle_end(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Обработка кнопки 'Завершить викторину'."""
 
     query = update.callback_query
     await query.answer()
 
-    if query.data == 'next':
-        await ask_next_question(update, context)
-        await query.edit_message_text('🔥 Следующий вопрос:')
-
-    elif query.data == 'end':
-        context.user_data.clear()
-        await query.edit_message_text(
-            'Викторина завершена. Спасибо за участие! 👋'
-        )
+    context.user_data.clear()
+    await query.edit_message_text('⛔ Викторина завершена! ⛔')
 
 
 async def handle_registration(update: Update, context: ContextTypes.DEFAULT_TYPE):

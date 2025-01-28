@@ -1,14 +1,18 @@
 """
 Модуль содержит функции генерации клавиатур.
 """
+import os
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+
+HELP_URL = os.getenv('HELP_URL')
+
 
 # Клавиатура для Меню
 menu_keyboard = InlineKeyboardMarkup([
     [
         InlineKeyboardButton('Настроить бота', callback_data='conf'),
-        InlineKeyboardButton('Информация о боте', callback_data='info'),
+        InlineKeyboardButton('Информация о боте', url=HELP_URL),
     ],
     [InlineKeyboardButton('Регистрация', callback_data='registration')],
 ])
@@ -35,17 +39,11 @@ topic_keyboard = InlineKeyboardMarkup([
     [
         InlineKeyboardButton(
             'Функции/Методы', callback_data='not_implemented'),
-        InlineKeyboardButton('Выражения', callback_data='not_implemented'),
+        InlineKeyboardButton(
+            'Выражения', callback_data='not_implemented'),
     ],
 ])
 
-# Клавиатура для продолжения или завершения викторины
-next_keyboard = InlineKeyboardMarkup([
-    [
-        InlineKeyboardButton('Далее', callback_data='next'),
-        InlineKeyboardButton('Завершить викторину', callback_data='end'),
-    ]
-])
 
 # Клавиатура для выбора настроек оповещения
 notification_keyboard = InlineKeyboardMarkup([

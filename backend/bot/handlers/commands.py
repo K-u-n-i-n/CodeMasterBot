@@ -25,7 +25,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True)
 
     await update.message.reply_text(
-        'Тут будет информация о тестах.\n\nВыберите одну из опций ниже.',
+        'Привет! 👋 Я CodeMasterBot.\n\n'
+        'Готов проверить свои знания?\n'
+        'Нажимай кнопку "Викторина"\nи погнали! 🎉\n\n'
+        'Если хочешь узнать о боте или настроить его под себя, жми "Меню".',
         reply_markup=reply_markup,
     )
 
