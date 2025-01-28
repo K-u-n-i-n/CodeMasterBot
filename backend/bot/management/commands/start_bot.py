@@ -22,7 +22,7 @@ from bot.init import get_bot_application
 
 load_dotenv()
 
-WEBHOOK_URL = os.getenv("WEBHOOK_URL")
+WEBHOOK_URL = os.getenv('WEBHOOK_URL')
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -59,8 +59,6 @@ class Command(BaseCommand):
             handlers.handle_topic_selection, pattern='topic'))
         application.add_handler(CallbackQueryHandler(
             handlers.handle_notifications_settings, pattern='notify'))
-        application.add_handler(CallbackQueryHandler(
-            handlers.handle_help_info, pattern='info'))
         application.add_handler(CallbackQueryHandler(
             handlers.handle_quiz_start, pattern='question'))
         application.add_handler(CallbackQueryHandler(

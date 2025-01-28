@@ -86,5 +86,5 @@
 
   
 ## Над проектом работали:
-Идея проекта/код: <span style="color: green;">*Кунин Александр*</span> (K.u.n.i.n@yandex.ru)  
-Тест: <span style="color: green;">*...*</span> ([...](...))
+Python Developer: <span style="color: green;">*Кунин Александр*</span> (k.u.n.i.n@mail.ru)  
+Manual QA Engineer: <span style="color: green;">*Татьяна Овчинникова*</span> (tg7110019@gmail.com)

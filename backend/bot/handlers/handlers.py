@@ -71,17 +71,6 @@ async def handle_notifications_settings(update: Update, context: ContextTypes.DE
         )
 
 
-async def handle_help_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Обрабатывает запрос информации о боте"""
-
-    query = update.callback_query
-    if query:
-        await query.answer()
-        await query.edit_message_text(
-            text='Подробнее о боте: https://github.com/K-u-n-i-n/CodeMasterBot'
-        )
-
-
 async def handle_quiz_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Начало викторины."""
     if update.message:
