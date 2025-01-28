@@ -52,26 +52,25 @@ class Command(BaseCommand):
 
         # Обработчики callback запросов
         application.add_handler(CallbackQueryHandler(
-            handlers.handle_config, pattern='conf'))
+            handlers.handle_config, pattern='^conf$'))
         application.add_handler(CallbackQueryHandler(
-            handlers.handle_complexity, pattern='complexity'))
+            handlers.handle_complexity, pattern='^complexity$'))
         application.add_handler(CallbackQueryHandler(
-            handlers.handle_topic_selection, pattern='topic'))
+            handlers.handle_topic_selection, pattern='^topic$'))
         application.add_handler(CallbackQueryHandler(
-            handlers.handle_notifications_settings, pattern='notify'))
+            handlers.handle_notifications_settings, pattern='^notify$'))
         application.add_handler(CallbackQueryHandler(
-            handlers.handle_quiz_start, pattern='question'))
+            handlers.handle_quiz_start, pattern='^question$'))
         application.add_handler(CallbackQueryHandler(
-            handlers.handle_registration, pattern='registration'))
-        # Функция - затычка
+            handlers.handle_registration, pattern='^registration$'))
+        application.add_handler(CallbackQueryHandler(
+            handlers.handle_end, pattern='^end$'))
+        application.add_handler(CallbackQueryHandler(
+            handlers.handle_question_answer, pattern='^(?!not_implemented).*'))
+
+        # Обработчик для заглушки (функции, которые еще не реализованы)
         application.add_handler(CallbackQueryHandler(
             handlers.handle_generic_callback, pattern='not_implemented'))
-        # Функция для ответов на вопросы
-        application.add_handler(CallbackQueryHandler(
-            handlers.handle_question_answer, pattern='^(?!next|end).*'))
-        # Регистрация CallbackQueryHandler для обработки 'Далее' и 'Завершить викторину'
-        application.add_handler(CallbackQueryHandler(
-            handlers.handle_next_or_end, pattern='^(next|end)$'))
 
         # Настройка очереди заданий
         job_queue = application.job_queue
@@ -90,9 +89,19 @@ class Command(BaseCommand):
         # application.run_polling()
 
         # Код для запуска бота в режиме Webhook
-        async def set_webhook():  # Функция для установки Webhook
-            await application.bot.set_webhook(WEBHOOK_URL)
-            logging.info(f"Webhook установлен на {WEBHOOK_URL}")
+        async def set_webhook():
+            if not WEBHOOK_URL:
+                logging.error("Ошибка: WEBHOOK_URL не установлен!")
+                return
+
+            try:
+                success = await application.bot.set_webhook(WEBHOOK_URL)
+                if success:
+                    logging.info(f"Webhook успешно установлен: {WEBHOOK_URL}")
+                else:
+                    logging.error("Ошибка при установке Webhook!")
+            except Exception as e:
+                logging.error(f"Ошибка Webhook: {e}")
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
