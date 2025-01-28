@@ -62,10 +62,26 @@
 [![Main CodeMasterBot workflow](https://github.com/K-u-n-i-n/CodeMasterBot/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/K-u-n-i-n/CodeMasterBot/actions/workflows/main.yml)
 
 
+## Развертывание на локальном сервере в режиме: Polling
+- [Зарегистрируйте Telegram бота](https://vc.ru/telegram/1552569-kak-sozdat-zaregistrirovat-telegram-bota)
+- Узнайте ID своего телеграм-аккаунта, необходимо для настройки оповещений (можно использовать для этого [бота](https://t.me/userinfobot))
+- Создайте файл .env в корне проекта. Шаблон для заполнения файла находится в .env.example
+- Установите [Docker](https://docs.docker.com/engine/install/) и [docker-compose](https://docs.docker.com/compose/install/) 
+- В файле **start_bot.py** раскомментируйте код который отвечает за режим Polling и закомментируйте - за режим Webhook
+- Запустите Docker Desktop 
+- Запустите docker compose, выполнив команду в терминале: `docker compose -f docker-compose.yml up --build -d`
+- Выполните миграции: `docker compose -f docker-compose.yml exec wsgi python manage.py migrate`
+- Создайте суперюзера: `docker compose -f docker-compose.yml exec wsgi python manage.py createsuperuser`
+- Соберите статику: `docker compose -f docker-compose.yml exec wsgi python manage.py collectstatic --no-input`
+- Зайдите в админку и создайте теги (тема: Функции, slug: func; тема: ..., slug: ...)
+- Заполните базу вопросами: `docker compose -f docker-compose.yml exec wsgi python manage.py populate_questions`
+- Бот готов к работе!
+
+
 
 ## Развертывание на локальном сервере в режиме: Webhook
 - [Зарегистрируйте Telegram бота](https://vc.ru/telegram/1552569-kak-sozdat-zaregistrirovat-telegram-bota)
-- Узнайте ID своего телеграм-аккаунта. Необходимо для настройки оповещений (можно использовать для этого [бота](https://t.me/userinfobot))
+- Узнайте ID своего телеграм-аккаунта, необходимо для настройки оповещений (можно использовать для этого [бота](https://t.me/userinfobot))
 - Создайте файл .env в корне проекта. Шаблон для заполнения файла находится в .env.example
 - Установите [Docker](https://docs.docker.com/engine/install/) и [docker-compose](https://docs.docker.com/compose/install/) 
 - [Зарегистрируйтесь](https://dashboard.ngrok.com/get-started/setup/) и установите ngrok (если вы из России, то будут трудности...)
