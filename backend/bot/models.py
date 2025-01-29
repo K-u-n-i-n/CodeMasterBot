@@ -1,3 +1,5 @@
+from datetime import time
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -104,7 +106,7 @@ class UserSettings(models.Model):
         default=False, verbose_name='Состояние уведомлений'
     )
     notification_time = models.TimeField(
-        blank=True, null=True,
+        blank=True, default=time(7, 0, 0),
         verbose_name='Время уведомлений'
     )
 

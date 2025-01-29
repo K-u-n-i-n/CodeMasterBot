@@ -15,13 +15,18 @@ from telegram import (
 from telegram.ext import ContextTypes
 
 from bot.handlers.utils import get_all_names_except, get_random_questions
-from bot.models import CustomUser, Question
+from bot.models import CustomUser, Question, UserSettings
 from .keyboards import (
     config_keyboard,
     complexity_keyboard,
     topic_keyboard,
     notification_keyboard
 )
+
+DEFAULT_SETTINGS_USER = {
+    'tag': 'func',
+    'difficulty': 'easy',
+}
 
 
 async def handle_config(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -80,12 +85,42 @@ def get_next_question(context):
     return None
 
 
+async def get_user_settings(user_id: int) -> tuple[dict, bool]:
+    """
+    Возвращает настройки пользователя.
+    Если пользователя нет в БД, возвращает глобальные настройки.
+    Если пользователя нет в UserSettings, возвращает его, но с флагом отсутствия настроек.
+    """
+    try:
+        user = await CustomUser.objects.aget(id=user_id)
+    except CustomUser.DoesNotExist:
+        return DEFAULT_SETTINGS_USER, False
+
+    try:
+        settings = await user.settings.aget()
+        return settings, True
+    except UserSettings.DoesNotExist:
+        return DEFAULT_SETTINGS_USER, False
+
+
 async def handle_quiz_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Начало викторины."""
     if not update.message:
         return
 
-    random_questions = await get_random_questions_by_tag(10, tag_slug='func')
+    user_id = update.effective_user.id
+
+    user_settings, has_personal_settings = await get_user_settings(user_id)
+
+    if not has_personal_settings:
+        await update.message.reply_text(
+            '❗ Вы можете настроить бота для себя! ❗\n'
+            '✨ Используйте кнопку "Настроить бота". ✨'
+        )
+
+    tag_slug = user_settings['tag'] or DEFAULT_SETTINGS_USER['tag']
+
+    random_questions = await get_random_questions_by_tag(10, tag_slug=tag_slug)
     if not random_questions:
         await send_no_questions_message(update)
         return
