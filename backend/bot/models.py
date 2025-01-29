@@ -7,7 +7,8 @@ from .managers.user_manager import CustomUserManager
 class CustomUser(AbstractUser):
 
     user_id = models.BigIntegerField(
-        unique=True, editable=False, verbose_name='Telegram ID'
+        unique=True, editable=False,
+        verbose_name='Telegram ID'
     )
     username = models.CharField(
         max_length=150, blank=True, null=True
@@ -84,6 +85,42 @@ class Question(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class UserSettings(models.Model):
+    user = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE,
+        related_name='settings'
+    )
+    tag = models.ForeignKey(
+        Tag, on_delete=models.SET_NULL,
+        null=True, blank=True
+    )
+    difficulty = models.CharField(
+        max_length=20, blank=True, null=True,
+        verbose_name='Уровень сложности'
+    )
+    notification = models.BooleanField(
+        default=False, verbose_name='Состояние уведомлений'
+    )
+    notification_time = models.TimeField(
+        blank=True, null=True,
+        verbose_name='Время уведомлений'
+    )
+
+    class Meta:
+        verbose_name = 'Настройки'
+        verbose_name_plural = 'Настройки'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'tag'], name='unique_user_tag'
+            )
+        ]
+
+    def __str__(self):
+        return (
+            f'Настройки бота для пользователя {self.user}'
+        )
 
 
 class UserQuestionStatistic(models.Model):
