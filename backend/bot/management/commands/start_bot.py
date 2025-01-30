@@ -25,9 +25,15 @@ load_dotenv()
 WEBHOOK_URL = os.getenv('WEBHOOK_URL')
 
 logging.basicConfig(
+    level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
+    handlers=[
+        # logging.FileHandler('app.log'),
+        logging.StreamHandler(),
+    ]
 )
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -66,6 +72,10 @@ class Command(BaseCommand):
         application.add_handler(CallbackQueryHandler(
             handlers.handle_end, pattern='^end$'))
         application.add_handler(CallbackQueryHandler(
+            handlers.handle_topic_choice, pattern='^(func|expressions)$'))
+        application.add_handler(CallbackQueryHandler(
+             handlers.handle_my_settings, pattern='^my_settings$'))
+        application.add_handler(CallbackQueryHandler(
             handlers.handle_question_answer, pattern='^(?!not_implemented).*'))
 
         # Обработчик для заглушки (функции, которые еще не реализованы)
@@ -84,24 +94,24 @@ class Command(BaseCommand):
         # # Запуск Polling, если не используется Webhook
         # async def delete_webhook():  # Функция для удаления Webhook
         #     await application.bot.delete_webhook()
-        #     logging.info("Webhook удален!")
+        #     logger.info("Webhook удален!")
 
         # application.run_polling()
 
         # Код для запуска бота в режиме Webhook
         async def set_webhook():
             if not WEBHOOK_URL:
-                logging.error("Ошибка: WEBHOOK_URL не установлен!")
+                logger.error("Ошибка: WEBHOOK_URL не установлен!")
                 return
 
             try:
                 success = await application.bot.set_webhook(WEBHOOK_URL)
                 if success:
-                    logging.info(f"Webhook успешно установлен: {WEBHOOK_URL}")
+                    logger.info(f"Webhook успешно установлен: {WEBHOOK_URL}")
                 else:
-                    logging.error("Ошибка при установке Webhook!")
+                    logger.error("Ошибка при установке Webhook!")
             except Exception as e:
-                logging.error(f"Ошибка Webhook: {e}")
+                logger.error(f"Ошибка Webhook: {e}")
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)

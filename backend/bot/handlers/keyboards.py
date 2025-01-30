@@ -14,7 +14,8 @@ menu_keyboard = InlineKeyboardMarkup([
         InlineKeyboardButton('Настроить бота', callback_data='conf'),
         InlineKeyboardButton('Информация о боте', url=HELP_URL),
     ],
-    [InlineKeyboardButton('Регистрация', callback_data='registration')],
+    [InlineKeyboardButton('Мои настройки', callback_data='my_settings')],
+    [InlineKeyboardButton('Зарегистрироваться', callback_data='registration')],
 ])
 
 
@@ -23,7 +24,8 @@ config_keyboard = InlineKeyboardMarkup([
     [
         InlineKeyboardButton('Сложность', callback_data='complexity'),
         InlineKeyboardButton('Тема', callback_data='topic'),
-    ], [InlineKeyboardButton('Настроить оповещение', callback_data='notify'),]
+    ], [InlineKeyboardButton('Настроить оповещение', callback_data='notify'),],
+    [InlineKeyboardButton('Мои настройки', callback_data='my_settings')],
 ])
 
 # Клавиатура для выбора сложности викторины
@@ -38,9 +40,9 @@ complexity_keyboard = InlineKeyboardMarkup([
 topic_keyboard = InlineKeyboardMarkup([
     [
         InlineKeyboardButton(
-            'Функции/Методы', callback_data='not_implemented'),
+            'Функции', callback_data='func'),
         InlineKeyboardButton(
-            'Выражения', callback_data='not_implemented'),
+            'Выражения', callback_data='expressions'),
     ],
 ])
 

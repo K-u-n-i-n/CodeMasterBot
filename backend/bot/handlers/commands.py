@@ -11,6 +11,9 @@ from .handlers import handle_quiz_start
 from .keyboards import menu_keyboard
 
 
+logger = logging.getLogger(__name__)
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработчик команды /start"""
 
@@ -50,7 +53,7 @@ async def roll_dice_command(update: Update, context: CallbackContext):
     if update.message is None:
         return
 
-    logging.info('Запуск roll_dice_command')
+    logger.info('Запуск roll_dice_command')
     await update.message.reply_dice()
 
 
