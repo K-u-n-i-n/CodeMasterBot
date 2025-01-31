@@ -10,7 +10,6 @@ from telegram.ext import ContextTypes, CallbackContext
 from .handlers import handle_quiz_start
 from .keyboards import menu_keyboard
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -57,7 +56,7 @@ async def roll_dice_command(update: Update, context: CallbackContext):
     await update.message.reply_dice()
 
 
-async def quiz_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def quiz_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработчик для Reply-кнопки (Викторина)"""
 
     await handle_quiz_start(update, context)
