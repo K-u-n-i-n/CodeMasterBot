@@ -1,5 +1,5 @@
-import random
 import logging
+import random
 
 from telegram import (
     Message,
@@ -27,7 +27,8 @@ async def create_keyboard(options: List[str]) -> InlineKeyboardMarkup:
     """Создает клавиатуру для выбора ответа."""
 
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton(option, callback_data=option)] for option in options
+        [InlineKeyboardButton(
+            option, callback_data=option)] for option in options
     ] + [
         [InlineKeyboardButton('⛔ Завершить викторину ⛔', callback_data='end')]
     ])

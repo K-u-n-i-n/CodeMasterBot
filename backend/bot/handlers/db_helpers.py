@@ -61,6 +61,7 @@ async def get_user_settings(
     Если пользователя нет в БД или в UserSettings,
     возвращает глобальные настройки.
     """
+
     try:
         user = await CustomUser.objects.aget(user_id=user_id)
         logger.info(f'Пользователь найден: {user.user_id}')
