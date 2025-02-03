@@ -3,20 +3,20 @@
 которые могут возникнуть у пользователей в процессе взаимодействия с ботом.
 """
 
-import random
 import logging
-from typing import Tuple, List, Union
 
 from asgiref.sync import sync_to_async
-from telegram import (
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    Update,
-)
+from telegram import Update, Message
 from telegram.ext import ContextTypes
 
-from bot.handlers import db_helpers, context_helpers, utils
-from bot.models import CustomUser, Question, UserSettings
+from bot.handlers import (
+    db_helpers,
+    context_helpers,
+    messages,
+    quiz_helpers,
+    utils
+)
+from bot.models import CustomUser, UserSettings
 from .keyboards import (
     config_keyboard,
     complexity_keyboard,
@@ -25,59 +25,58 @@ from .keyboards import (
     topic_keyboard,
 )
 
-
 logger = logging.getLogger(__name__)
-
-DEFAULT_SETTINGS_USER = {
-    'tag': 'func',
-    'difficulty': 'easy',
-}
 
 
 async def handle_config(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает настройку бота"""
 
-    query = update.callback_query
-    if query:
-        await query.answer()
-        await query.edit_message_text(
-            text='Выберите параметр для настройки:',
-            reply_markup=config_keyboard
-        )
+    query = context_helpers.get_callback_query(update)
+    if not query:
+        return
+
+    await query.answer()
+    await query.edit_message_text(
+        text='Выберите параметр для настройки:',
+        reply_markup=config_keyboard
+    )
 
 
 async def handle_complexity(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает выбор сложности"""
 
-    query = update.callback_query
-    if query:
-        await query.answer()
-        await query.edit_message_text(
-            text='Выберите сложность:', reply_markup=complexity_keyboard
-        )
+    query = context_helpers.get_callback_query(update)
+    if not query:
+        return
+
+    await query.answer()
+    await query.edit_message_text(
+        text='Выберите сложность:', reply_markup=complexity_keyboard
+    )
 
 
 async def handle_topic_selection(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает выбор темы"""
 
-    query = update.callback_query
-    if query:
-        await query.answer()
-        await query.edit_message_text(
-            text='Выберите тему:', reply_markup=topic_keyboard
-        )
+    query = context_helpers.get_callback_query(update)
+    if not query:
+        return
+
+    await query.answer()
+    await query.edit_message_text(
+        text='Выберите тему:', reply_markup=topic_keyboard
+    )
 
 
 async def handle_topic_choice(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает выбор темы викторины и сохраняет её в настройках."""
 
-    query = update.callback_query
+    query = context_helpers.get_callback_query(update)
     if not query:
-        logger.warning('CallbackQuery отсутствует в update.')
         return
 
     await query.answer()
@@ -118,62 +117,47 @@ async def handle_notifications_settings(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает запросы, связанные с изменением настроек оповещений"""
 
-    query = update.callback_query
-    if query:
-        await query.answer()
-        await query.edit_message_text(
-            text='Выберите параметр для настройки:',
-            reply_markup=notification_keyboard
-        )
+    query = context_helpers.get_callback_query(update)
+    if not query:
+        return
 
-
-async def get_user_settings(
-        user_id: int) -> Tuple[Union[UserSettings, dict], bool]:
-    """
-    Возвращает настройки пользователя.
-    Если пользователя нет в БД или в UserSettings,
-    возвращает глобальные настройки.
-    """
-    try:
-        user = await CustomUser.objects.aget(user_id=user_id)
-        logger.info(f'Пользователь найден: {user.user_id}')
-
-    except CustomUser.DoesNotExist:
-        logger.warning(f'Пользователь с ID {user_id} не найден')
-        return DEFAULT_SETTINGS_USER, False
-
-    try:
-        settings = await UserSettings.objects.select_related('tag').aget(
-            user=user)
-        logger.info(f'Настройки для пользователя с ID {user_id} найдены')
-        return settings, True
-
-    except UserSettings.DoesNotExist:
-        logger.info(f'Настройки для пользователя с ID {user_id} не найдены')
-        return DEFAULT_SETTINGS_USER, False
+    await query.answer()
+    await query.edit_message_text(
+        text='Выберите параметр для настройки:',
+        reply_markup=notification_keyboard
+    )
 
 
 async def handle_my_settings(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает кнопку 'Мои настройки'."""
 
-    query = update.callback_query
+    logger.info('Начало обработки запроса "Мои настройки".')
+
+    query = context_helpers.get_callback_query(update)
+    if not query:
+        return
+
     user_id = query.from_user.id
-    settings, has_settings = await get_user_settings(user_id)
+    settings, has_settings = await db_helpers.get_user_settings(user_id)
     keyboard = menu_keyboard
 
     if not has_settings:
         text = 'У вас пока нет сохраненных настроек.'
     else:
-        text = (
-            f'📌 <b>Ваши настройки</b>\n\n'
-            f'🎯 <b>Тема:</b> {settings.tag or 'Не настроено'}\n'
-            f'⚙️ <b>Сложность:</b> {settings.difficulty or 'Не настроено'}\n'
-            f'🔔 <b>Оповещение:</b> {settings.notification or 'Не настроено'}\n'
-            f'⏰ <b>Время оповещений:</b>'
-            f'{settings.notification_time.strftime("%H:%M")}\n\n'
-            f'📢❗🚨 <b>Внимание: время по UTC</b> 📢❗🚨'
-        )
+        if isinstance(settings, UserSettings):
+            text = (
+                '📌 <b>Ваши настройки</b>\n\n'
+                '🎯 <b>Тема:</b> '
+                f'{settings.tag or 'Не настроено'}\n'
+                '⚙️ <b>Сложность:</b> '
+                f'{settings.difficulty or 'Не настроено'}\n'
+                '🔔 <b>Оповещение:</b> '
+                f'{settings.notification or 'Не настроено'}\n'
+                '⏰ <b>Время оповещений:</b> '
+                f'{settings.notification_time.strftime("%H:%M")}\n\n'
+                '📢❗🚨 <b>Внимание: время по UTC</b> 📢❗🚨'
+            )
 
     await query.answer()
     await query.edit_message_text(
@@ -185,11 +169,21 @@ async def handle_quiz_start(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Начало викторины."""
 
+    logger.info('Начало обработки запроса "Викторина".')
+
     if not update.message:
+        logger.error('Обновление не содержит сообщения.')
+        return
+
+    if update.effective_user is None:
+        logger.warning('effective_user отсутствует в update.')
+        await update.message.reply_text('Не удалось определить пользователя.')
         return
 
     user_id = update.effective_user.id
-    user_settings, has_personal_settings = await get_user_settings(user_id)
+    user_settings, has_personal_settings = (
+        await db_helpers.get_user_settings(user_id)
+    )
 
     if not has_personal_settings:
         await update.message.reply_text(
@@ -199,108 +193,50 @@ async def handle_quiz_start(
             'Для настройки бота необходимо:\n'
             '⚠️ "Зарегистрироваться" ⚠️'
         )
-        tag_slug = DEFAULT_SETTINGS_USER['tag']
+        tag_slug = db_helpers.DEFAULT_SETTINGS_USER['tag']
 
     else:
-        tag_slug = user_settings.tag.slug
+        if isinstance(user_settings, UserSettings):
+            tag_slug = user_settings.tag.slug
+        else:
+            logger.warning(
+                f'Настройки пользователя с ID {user_id}'
+                f' некорректны: {user_settings}'
+            )
+            await update.message.reply_text('Ошибка при получении настроек.')
+            tag_slug = db_helpers.DEFAULT_SETTINGS_USER['tag']
 
-    random_questions = await get_random_questions_by_tag(10, tag_slug=tag_slug)
+    random_questions = await db_helpers.get_random_questions_by_tag(
+        10, tag_slug=tag_slug)
     if not random_questions:
-        await send_no_questions_message(update)
+        await messages.send_no_questions_message(update)
         return
 
-    await prepare_quiz_context(context, random_questions)
+    await context_helpers.prepare_quiz_context(context, random_questions)
 
-    next_question = await get_next_question_from_context(context)
+    next_question = await context_helpers.get_next_question_from_context(
+        context)
     if not next_question:
-        await send_error_message(update)
+        await messages.send_error_message(update)
         return
 
-    await ask_next_question(update, context)
-
-
-async def get_random_questions_by_tag(
-        count: int, tag_slug: str) -> List[Question]:
-    """Получает случайные вопросы по указанному тегу."""
-
-    queryset = Question.objects.filter(tags__slug=tag_slug)
-    return await utils.get_random_questions(queryset, count)
-
-
-async def send_no_questions_message(update: Update) -> None:
-    """Отправляет сообщение о том, что вопросов нет."""
-
-    await update.message.reply_text(
-        'К сожалению, в этой теме вопросов нет. 😔\n'
-        'Выберите пожалуйста другую тему'
-    )
-
-
-async def prepare_quiz_context(
-        context: ContextTypes.DEFAULT_TYPE, questions: List[Question]) -> None:
-    """Сохраняет данные викторины в user_data."""
-
-    context.user_data['quiz_questions'] = questions
-    context.user_data['used_names'] = [q.name for q in questions]
-
-
-async def get_next_question_from_context(
-        context: ContextTypes.DEFAULT_TYPE) -> Union[Question, None]:
-    """Извлекает следующий вопрос из контекста."""
-
-    next_question = context_helpers.get_next_question(context)
-    if next_question:
-        context.user_data['current_question'] = next_question
-    return next_question
-
-
-async def send_error_message(update: Update) -> None:
-    """Отправляет сообщение об ошибке."""
-
-    await update.message.reply_text('Что-то пошло не так. Вопросы отсутствуют.')
-
-
-async def ask_next_question(
-        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Вывод вопроса с вариантами ответа."""
-
-    current_question = context.user_data.get('current_question')
-    if not current_question:
-        logger.warning('Попытка задать вопрос, но вопрос не найден.')
-        return
-
-    all_names = await utils.get_all_names_except(current_question.id)
-    incorrect_answers = random.sample(all_names, k=min(3, len(all_names)))
-    options = [current_question.name] + incorrect_answers
-    random.shuffle(options)
-
-    keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton(option, callback_data=option)] for option in options
-    ] + [
-        [InlineKeyboardButton('⛔ Завершить викторину ⛔', callback_data='end')]
-    ])
-
-    remaining_questions = len(context.user_data.get('quiz_questions', []))
-
-    message = update.message or update.callback_query.message
-    if message:
-        await message.reply_text(
-            text=(
-                f'Осталось вопросов: {remaining_questions}\n\n'
-                f'Описание функции:\n\n'
-                f'{current_question.description}\n\n'
-                f'Выберите правильный ответ:'
-            ),
-            reply_markup=keyboard,
-        )
+    await quiz_helpers.ask_next_question(update, context)
 
 
 async def handle_question_answer(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработка ответа пользователя на текущий вопрос."""
 
-    query = update.callback_query
+    query = context_helpers.get_callback_query(update)
+    if not query:
+        return
+
     await query.answer()
+
+    if context.user_data is None:
+        logger.warning('context.user_data отсутствует.')
+        await query.edit_message_text('Ошибка: нет данных пользователя.')
+        return
 
     current_question = context.user_data.get('current_question')
     if not current_question:
@@ -311,14 +247,14 @@ async def handle_question_answer(
 
     if user_answer == current_question.name:
         text = (
-            f'✅ Правильно! Отличная работа!\n\n'
+            '✅ Правильно! Отличная работа!\n\n'
             f'Название функции: {current_question.name}\n\n'
             f'Описание функции:\n{current_question.description}\n\n'
             f'Синтаксис:\n{current_question.syntax}'
         )
     else:
         text = (
-            f'❌ Неправильно.\n\n'
+            '❌ Неправильно.\n\n'
             f'Ваш ответ: {user_answer}\n'
             f'Правильный ответ: {current_question.name}\n\n'
             f'Описание функции:\n{current_question.description}\n\n'
@@ -331,29 +267,45 @@ async def handle_question_answer(
 
 async def handle_next_step(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Определяет следующий шаг: завершение викторины или показ следующего вопроса."""
+    """
+    Определяет следующий шаг:
+    завершение викторины или показ следующего вопроса.
+    """
 
     next_question = context_helpers.get_next_question(context)
 
     if next_question:
-        context.user_data['current_question'] = next_question
-        await ask_next_question(update, context)
+        if context.user_data:
+            context.user_data['current_question'] = next_question
+        await quiz_helpers.ask_next_question(update, context)
+
     else:
-        await (update.message or update.callback_query.message).reply_text(
-            'Викторина завершена. Спасибо за участие! 👋'
+        message = update.message or (
+            update.callback_query.message if update.callback_query else None
         )
-        context.user_data.clear()
+
+        if isinstance(message, Message):
+            await message.reply_text(
+                'Викторина завершена. Спасибо за участие! 👋'
+            )
+
+        if context.user_data:
+            context.user_data.clear()
 
 
 async def handle_end(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработка кнопки 'Завершить викторину'."""
 
-    query = update.callback_query
+    query = context_helpers.get_callback_query(update)
+    if not query:
+        return
+
     await query.answer()
 
-    context.user_data.clear()
-    await query.edit_message_text('⛔ Викторина завершена! ⛔')
+    if context.user_data:
+        context.user_data.clear()
+        await query.edit_message_text('⛔ Викторина завершена! ⛔')
 
 
 async def handle_registration(
@@ -374,11 +326,19 @@ async def handle_registration(
 
     await update.callback_query.answer()
 
+    if update.effective_user is None:
+        logger.warning('effective_user отсутствует в update.')
+        return
+
     telegram_id = update.effective_user.id
     username = update.effective_user.username
 
     user, created = await sync_to_async(
         CustomUser.objects.get_or_create)(user_id=telegram_id)
+
+    if not isinstance(update.callback_query.message, Message):
+        logger.warning('callback_query.message не является объектом Message.')
+        return
 
     if created:
         user.username = username
@@ -394,10 +354,9 @@ async def handle_generic_callback(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает универсальный callback-запрос"""
 
-    if update.callback_query is None:
+    query = context_helpers.get_callback_query(update)
+    if not query:
         return
-
-    query = update.callback_query
 
     await query.answer()
     await query.edit_message_text(

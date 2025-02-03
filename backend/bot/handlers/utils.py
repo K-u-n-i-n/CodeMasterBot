@@ -25,6 +25,8 @@ TOPIC_MAPPING = {
 
 
 async def daily_task(context: CallbackContext) -> None:
+    """Ежедневная задача, отправляющая напоминание в указанный чат."""
+
     logger.info('Запуск daily_task')
     chat_id = os.getenv('BOOS_CHAT_ID')
     await context.bot.send_message(
