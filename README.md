@@ -25,7 +25,7 @@
 
 ---
 Подробнее ознакомится с ходом работы можно в [релизах](https://github.com/K-u-n-i-n/CodeMasterBot/releases)  
-Пощупать моего бота можно тут:  [CodeMasterBot](https://t.me/CodeMasterSuperBot)  
+Пощупать моего бота можно тут:  [CodeMasterBot](https://t.me/skill_tester_bot)  
 
 
 

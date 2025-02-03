@@ -10,6 +10,7 @@ from telegram import (
 from telegram.ext import ContextTypes
 from typing import List
 
+from bot.handlers.static_data import STICKERS
 from bot.handlers import utils
 
 
@@ -97,3 +98,43 @@ async def ask_next_question(
     await send_question_message(
         update, current_question, remaining_questions, keyboard
     )
+
+
+async def finish_quiz(
+        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Обрабатывает завершение викторины:
+    вывод результата и отправка стикера.
+    """
+
+    if context.user_data is None:
+        return None
+
+    correct_answers = context.user_data.get('correct_answers', 0)
+
+    message = update.message or (
+        update.callback_query.message if update.callback_query else None)
+    if isinstance(message, Message):
+        await message.reply_text(
+            '🎉 Викторина завершена!\n\n'
+            f'🎯 Правильных ответов: {correct_answers} из 10.'
+        )
+        await send_sticker(message, correct_answers)
+        await message.reply_text(
+            'Чтобы начать сначала, нажмите на кнопку ✨ "Викторина" ✨'
+        )
+
+    context.user_data.clear()
+
+
+async def send_sticker(message: Message, correct_answers: int) -> None:
+    """Выбирает и отправляет стикер в зависимости от результата викторины."""
+
+    if correct_answers == 10:
+        sticker = random.choice(STICKERS['perfect'])
+    elif 7 <= correct_answers <= 9:
+        sticker = random.choice(STICKERS['great'])
+    else:
+        sticker = random.choice(STICKERS['good'])
+
+    await message.reply_sticker(sticker)

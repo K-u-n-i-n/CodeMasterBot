@@ -246,6 +246,9 @@ async def handle_question_answer(
     user_answer = query.data  # Ответ пользователя из callback_data
 
     if user_answer == current_question.name:
+        context.user_data['correct_answers'] = (
+            context.user_data.get('correct_answers', 0) + 1
+        )
         text = (
             '✅ Правильно! Отличная работа!\n\n'
             f'Название функции: {current_question.name}\n\n'
@@ -267,30 +270,22 @@ async def handle_question_answer(
 
 async def handle_next_step(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """
-    Определяет следующий шаг:
-    завершение викторины или показ следующего вопроса.
-    """
+    """Определяет: задать новый вопрос или завершить викторину."""
 
-    next_question = context_helpers.get_next_question(context)
+    if context.user_data is None:
+        return None
+
+    if context.user_data and 'quiz_questions' in context.user_data:
+        next_question = context.user_data['quiz_questions'].pop(
+            0) if context.user_data['quiz_questions'] else None
+    else:
+        next_question = None
 
     if next_question:
-        if context.user_data:
-            context.user_data['current_question'] = next_question
+        context.user_data['current_question'] = next_question
         await quiz_helpers.ask_next_question(update, context)
-
     else:
-        message = update.message or (
-            update.callback_query.message if update.callback_query else None
-        )
-
-        if isinstance(message, Message):
-            await message.reply_text(
-                'Викторина завершена. Спасибо за участие! 👋'
-            )
-
-        if context.user_data:
-            context.user_data.clear()
+        await quiz_helpers.finish_quiz(update, context)
 
 
 async def handle_end(

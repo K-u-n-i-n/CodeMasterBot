@@ -34,7 +34,8 @@ async def get_user_from_db(user_id: int) -> CustomUser | None:
 async def get_or_create_user_settings(user: CustomUser) -> UserSettings:
     """Получает или создаёт объект UserSettings для пользователя."""
 
-    settings, created = await sync_to_async(UserSettings.objects.get_or_create)(user=user)
+    settings, created = await sync_to_async(
+        UserSettings.objects.get_or_create)(user=user)
     if created:
         logger.info(
             f'Создан новый объект UserSettings для пользователя {user.id}.')
