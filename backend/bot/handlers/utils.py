@@ -77,35 +77,3 @@ async def send_response_message(
         await query.message.reply_text(text, reply_markup=reply_markup)
     else:
         logger.error('Объект message отсутствует или имеет неправильный тип.')
-
-
-# async def gif_button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     """Обработчик кнопки 'GIF'"""
-
-#     if update.callback_query is None:
-#         return
-
-#     query = update.callback_query
-#     await query.answer()  # Закрываем 'часики' у кнопки
-
-#     # Отправляем GIF
-#     await context.bot.send_animation(
-#         chat_id=query.message.chat_id,
-#         animation='https://media.giphy.com/media/Ju7l5y9osyymQ/giphy.gif'
-#     )
-
-
-# async def sticker_button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     """Обработчик кнопки 'Стикер'"""
-
-#     if update.callback_query is None:
-#         return
-
-#     query = update.callback_query
-#     await query.answer()  # Закрываем 'часики' у кнопки
-
-#     # Отправляем стикер
-#     await context.bot.send_sticker(
-#         chat_id=query.message.chat_id,
-#         sticker='CAACAgIAAxkBAAENI65nOalFB9bRBZR2EjqfzGEAATkDHaAAAgEAA8A2TxMYLnMwqz8tUTYE'
-#     )
