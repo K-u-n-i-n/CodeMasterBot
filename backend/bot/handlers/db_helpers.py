@@ -24,7 +24,7 @@ async def get_user_from_db(user_id: int) -> CustomUser | None:
     try:
         return await sync_to_async(CustomUser.objects.get)(user_id=user_id)
     except ObjectDoesNotExist:
-        logger.warning(f'Пользователь с id {user_id} не найден.')
+        logger.warning(f'Пользователь с id {user_id} в бд не найден.')
         return None
     except Exception as e:
         logger.error(f'Ошибка при получении пользователя: {e}')

@@ -55,6 +55,12 @@ class Command(BaseCommand):
             filters.TEXT & filters.Regex('^Бросить кубик$'),
             commands.roll_dice_command))
 
+        # Обработчик для ввода времени уведомлений
+        application.add_handler(MessageHandler(
+            filters.TEXT & ~filters.COMMAND,
+            notifications.handle_notification_time_input
+        ))
+
         # Обработчики callback запросов
         application.add_handler(CallbackQueryHandler(
             handlers.handle_config, pattern='^conf$'))
@@ -73,8 +79,6 @@ class Command(BaseCommand):
         application.add_handler(CallbackQueryHandler(
             handlers.handle_topic_choice, pattern='^(func|expressions)$'))
         application.add_handler(CallbackQueryHandler(
-            handlers.handle_my_settings, pattern='^my_settings$'))
-        application.add_handler(CallbackQueryHandler(
             notifications.handle_notification_toggle,
             pattern='^(notifications_on|notifications_off)$'
         ))
@@ -88,12 +92,6 @@ class Command(BaseCommand):
         # Обработчик для заглушки (функции, которые еще не реализованы)
         application.add_handler(CallbackQueryHandler(
             handlers.handle_generic_callback, pattern='not_implemented'))
-
-        # Обработчик для ввода времени уведомлений
-        application.add_handler(MessageHandler(
-            filters.TEXT & ~filters.COMMAND,
-            notifications.handle_notification_time_input
-        ))
 
         # Настройка очереди заданий
         job_queue = application.job_queue

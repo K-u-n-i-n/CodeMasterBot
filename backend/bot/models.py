@@ -90,16 +90,23 @@ class Question(models.Model):
 
 
 class UserSettings(models.Model):
+    DIFFICULTY_CHOICES = [
+        ('easy', 'Easy'),
+        ('hard', 'Hard'),
+    ]
+
     user = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE,
         related_name='settings'
     )
     tag = models.ForeignKey(
         Tag, on_delete=models.SET_NULL,
-        null=True, blank=True
+        null=True, blank=True,
+        default=1, verbose_name='Тема'
     )
     difficulty = models.CharField(
         max_length=20, blank=True, null=True,
+        choices=DIFFICULTY_CHOICES, default='easy',
         verbose_name='Уровень сложности'
     )
     notification = models.BooleanField(

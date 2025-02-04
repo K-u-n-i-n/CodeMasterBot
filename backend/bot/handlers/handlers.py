@@ -20,7 +20,6 @@ from bot.models import CustomUser, UserSettings
 from .keyboards import (
     config_keyboard,
     complexity_keyboard,
-    menu_keyboard,
     notification_keyboard,
     topic_keyboard,
 )
@@ -36,10 +35,30 @@ async def handle_config(
     if not query:
         return
 
+    user_id = query.from_user.id
+    settings, has_settings = await db_helpers.get_user_settings(user_id)
+    keyboard = config_keyboard
+
+    if not has_settings:
+        text = 'У вас пока нет сохраненных настроек.'
+    else:
+        if isinstance(settings, UserSettings):
+            text = (
+                '📌 <b>Ваши настройки</b>\n\n'
+                '⚙️ <b>Сложность:</b> '
+                f'{settings.difficulty or 'Не настроено'}\n'
+                '🎯 <b>Тема:</b> '
+                f'{settings.tag or 'Не настроено'}\n'
+                '🔔 <b>Оповещение:</b> '
+                f'{'ВКЛ' if settings.notification else 'ВЫКЛ'}\n'
+                '⏰ <b>Время оповещений:</b> '
+                f'{settings.notification_time.strftime("%H:%M")}\n\n'
+                '📢❗🚨 <b>Внимание: время по UTC</b> 📢❗🚨'
+            )
+
     await query.answer()
     await query.edit_message_text(
-        text='Выберите параметр для настройки:',
-        reply_markup=config_keyboard
+        text=text, reply_markup=keyboard, parse_mode='HTML'
     )
 
 
@@ -92,7 +111,7 @@ async def handle_topic_choice(
     chosen_topic = await utils.get_chosen_topic(query)
     if not chosen_topic:
         await utils.send_response_message(
-            query, 'Выбранная тема не найдена. Попробуйте снова.'
+            query, 'Что-то пошло не так. Выбранная тема не найдена.'
         )
         return
 
@@ -105,12 +124,7 @@ async def handle_topic_choice(
         )
         return
 
-    await utils.send_response_message(
-        query,
-        f'Тема викторины обновлена: {chosen_topic}.\n'
-        'Выберите другие настройки или можете проходить викторину.',
-        reply_markup=config_keyboard
-    )
+    await handle_config(update, context)
 
 
 async def handle_notifications_settings(
@@ -125,43 +139,6 @@ async def handle_notifications_settings(
     await query.edit_message_text(
         text='Выберите параметр для настройки:',
         reply_markup=notification_keyboard
-    )
-
-
-async def handle_my_settings(
-        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Обрабатывает кнопку 'Мои настройки'."""
-
-    logger.info('Начало обработки запроса "Мои настройки".')
-
-    query = context_helpers.get_callback_query(update)
-    if not query:
-        return
-
-    user_id = query.from_user.id
-    settings, has_settings = await db_helpers.get_user_settings(user_id)
-    keyboard = menu_keyboard
-
-    if not has_settings:
-        text = 'У вас пока нет сохраненных настроек.'
-    else:
-        if isinstance(settings, UserSettings):
-            text = (
-                '📌 <b>Ваши настройки</b>\n\n'
-                '🎯 <b>Тема:</b> '
-                f'{settings.tag or 'Не настроено'}\n'
-                '⚙️ <b>Сложность:</b> '
-                f'{settings.difficulty or 'Не настроено'}\n'
-                '🔔 <b>Оповещение:</b> '
-                f'{'ВКЛ' if settings.notification else 'ВЫКЛ'}\n'
-                '⏰ <b>Время оповещений:</b> '
-                f'{settings.notification_time.strftime("%H:%M")}\n\n'
-                '📢❗🚨 <b>Внимание: время по UTC</b> 📢❗🚨'
-            )
-
-    await query.answer()
-    await query.edit_message_text(
-        text=text, reply_markup=keyboard, parse_mode='HTML'
     )
 
 
@@ -355,5 +332,6 @@ async def handle_generic_callback(
 
     await query.answer()
     await query.edit_message_text(
-        text='Эта функция в данный момент не реализована.'
+        text='Эта функция в данный момент не реализована.',
+        reply_markup=config_keyboard
     )
