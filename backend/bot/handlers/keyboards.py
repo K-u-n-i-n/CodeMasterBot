@@ -46,12 +46,16 @@ topic_keyboard = InlineKeyboardMarkup([
     ],
 ])
 
-
-# Клавиатура для выбора настроек оповещения
+# Клавиатура для вкл/откл оповещения
 notification_keyboard = InlineKeyboardMarkup([
     [
-        InlineKeyboardButton('ВКЛ', callback_data='not_implemented'),
-        InlineKeyboardButton('ВЫКЛ', callback_data='not_implemented'),
+        InlineKeyboardButton('ВКЛ', callback_data='notifications_on'),
+        InlineKeyboardButton('ВЫКЛ', callback_data='notifications_off'),
     ],
-    [InlineKeyboardButton('Настроить время', callback_data='not_implemented'),]
+])
+
+# Клавиатура для настройки времени оповещения
+notification_time_keyboard = InlineKeyboardMarkup([
+    [InlineKeyboardButton(
+        'Настроить время', callback_data='set_notification_time')]
 ])

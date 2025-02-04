@@ -4,8 +4,8 @@
 """
 
 import logging
-import os
 import random
+from datetime import datetime, timezone
 
 from asgiref.sync import sync_to_async
 from telegram import (
@@ -14,7 +14,7 @@ from telegram import (
 )
 from telegram.ext import CallbackContext
 
-from bot.models import Question
+from bot.models import Question, UserSettings
 
 logger = logging.getLogger(__name__)
 
@@ -25,13 +25,42 @@ TOPIC_MAPPING = {
 
 
 async def daily_task(context: CallbackContext) -> None:
-    """Ежедневная задача, отправляющая напоминание в указанный чат."""
+    """
+    Ежедневная задача, отправляющая напоминание пользователям
+    с включенными уведомлениями.
+    """
 
     logger.info('Запуск daily_task')
-    chat_id = os.getenv('BOOS_CHAT_ID')
-    await context.bot.send_message(
-        chat_id=chat_id, text='Не забудь повторить теорию!'
-    )
+
+    users_with_notifications = await sync_to_async(
+        lambda: list(
+            UserSettings.objects.filter(notification=True)
+            .select_related('user')
+        )
+    )()
+
+    for settings in users_with_notifications:
+        user = settings.user
+        notification_time = settings.notification_time
+
+        now_utc = datetime.now(timezone.utc).time()
+        if (
+            now_utc.hour == notification_time.hour
+            and now_utc.minute == notification_time.minute
+        ):
+            try:
+                await context.bot.send_message(
+                    chat_id=user.user_id,
+                    text='Не забудь повторить теорию!'
+                )
+                logger.info(
+                    f'Уведомление отправлено пользователю {user.user_id}.'
+                )
+            except Exception as e:
+                logger.error(
+                    'Ошибка при отправке уведомления'
+                    f' пользователю {user.user_id}: {e}'
+                )
 
 
 @sync_to_async

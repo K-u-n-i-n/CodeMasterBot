@@ -153,7 +153,7 @@ async def handle_my_settings(
                 '⚙️ <b>Сложность:</b> '
                 f'{settings.difficulty or 'Не настроено'}\n'
                 '🔔 <b>Оповещение:</b> '
-                f'{settings.notification or 'Не настроено'}\n'
+                f'{'ВКЛ' if settings.notification else 'ВЫКЛ'}\n'
                 '⏰ <b>Время оповещений:</b> '
                 f'{settings.notification_time.strftime("%H:%M")}\n\n'
                 '📢❗🚨 <b>Внимание: время по UTC</b> 📢❗🚨'
