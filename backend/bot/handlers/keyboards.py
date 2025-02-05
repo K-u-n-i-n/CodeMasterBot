@@ -24,16 +24,18 @@ menu_keyboard = InlineKeyboardMarkup([
 config_keyboard = InlineKeyboardMarkup([
     [
         InlineKeyboardButton('Сложность', callback_data='complexity'),
-        InlineKeyboardButton('Тема', callback_data='topic'),
+        InlineKeyboardButton('Тема', callback_data='not_implemented'),
+        # InlineKeyboardButton('Тема', callback_data='topic'),
     ], [InlineKeyboardButton('Настроить оповещение', callback_data='notify'),]
 ])
+
 
 # Клавиатура для выбора сложности викторины
 complexity_keyboard = InlineKeyboardMarkup([
     [
-        InlineKeyboardButton('Easy', callback_data='not_implemented'),
-        InlineKeyboardButton('Hard', callback_data='not_implemented'),
-    ],
+        InlineKeyboardButton('Easy', callback_data='quiz_mode_easy'),
+        InlineKeyboardButton('Hard', callback_data='quiz_mode_hard'),
+    ], [InlineKeyboardButton('Назад', callback_data='conf')],
 ])
 
 # Клавиатура для выбора темы викторины

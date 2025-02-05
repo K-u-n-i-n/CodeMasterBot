@@ -18,6 +18,11 @@ def get_next_question(
     возвращает оставшееся количество вопросов.
     """
 
+    logger.info(
+        'Получает вопрос, удаляет его из списка и '
+        'возвращает оставшееся количество вопросов.'
+    )
+
     if context.user_data is None:
         return None
 
@@ -34,6 +39,8 @@ async def prepare_quiz_context(
         context: ContextTypes.DEFAULT_TYPE, questions: List[Question]) -> None:
     """Сохраняет данные викторины в user_data."""
 
+    logger.info('Сохраняет данные викторины в user_data.')
+
     if context.user_data is None:
         return None
 
@@ -44,6 +51,8 @@ async def prepare_quiz_context(
 async def get_next_question_from_context(
         context: ContextTypes.DEFAULT_TYPE) -> Union[Question, None]:
     """Извлекает следующий вопрос из контекста."""
+
+    logger.info('Получение следующего вопроса из контекста.')
 
     if context.user_data is None:
         return None
@@ -56,6 +65,8 @@ async def get_next_question_from_context(
 
 def get_callback_query(update: Update) -> Optional[CallbackQuery]:
     """Извлекает callback_query из update и логирует его отсутствие."""
+
+    logger.info('Получение callback_query из update.')
 
     query = update.callback_query
     if query is None:

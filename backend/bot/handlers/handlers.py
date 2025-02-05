@@ -13,6 +13,8 @@ from bot.handlers import (
     db_helpers,
     context_helpers,
     messages,
+    notifications,
+    quiz_answer_handlers,
     quiz_helpers,
     utils
 )
@@ -30,6 +32,8 @@ logger = logging.getLogger(__name__)
 async def handle_config(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает настройку бота"""
+
+    logger.info('Запуск handle_config')
 
     query = context_helpers.get_callback_query(update)
     if not query:
@@ -66,6 +70,8 @@ async def handle_complexity(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает выбор сложности"""
 
+    logger.info('Запуск handle_complexity')
+
     query = context_helpers.get_callback_query(update)
     if not query:
         return
@@ -80,6 +86,8 @@ async def handle_topic_selection(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает выбор темы"""
 
+    logger.info('Запуск handle_topic_selection')
+
     query = context_helpers.get_callback_query(update)
     if not query:
         return
@@ -93,6 +101,8 @@ async def handle_topic_selection(
 async def handle_topic_choice(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает выбор темы викторины и сохраняет её в настройках."""
+
+    logger.info('Запуск handle_topic_choice')
 
     query = context_helpers.get_callback_query(update)
     if not query:
@@ -130,6 +140,8 @@ async def handle_topic_choice(
 async def handle_notifications_settings(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает запросы, связанные с изменением настроек оповещений"""
+
+    logger.info('Запуск handle_notifications_settings')
 
     query = context_helpers.get_callback_query(update)
     if not query:
@@ -204,6 +216,8 @@ async def handle_question_answer(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработка ответа пользователя на текущий вопрос."""
 
+    logger.info('Запуск handle_question_answer')
+
     query = context_helpers.get_callback_query(update)
     if not query:
         return
@@ -249,6 +263,8 @@ async def handle_next_step(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Определяет: задать новый вопрос или завершить викторину."""
 
+    logger.info('Запуск handle_next_step')
+
     if context.user_data is None:
         return None
 
@@ -268,6 +284,8 @@ async def handle_next_step(
 async def handle_end(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработка кнопки 'Завершить викторину'."""
+
+    logger.info('Запуск handle_end')
 
     query = context_helpers.get_callback_query(update)
     if not query:
@@ -322,9 +340,41 @@ async def handle_registration(
         )
 
 
+async def handle_user_input(
+        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Определяет, что ввел пользователь:
+    ответ на вопрос викторины или время уведомления.
+    """
+
+    logger.info('Запуск handle_user_input')
+
+    user_data = context.user_data
+
+    if user_data is not None and user_data.get('awaiting_notification_time'):
+        await notifications.handle_notification_time_input(update, context)
+        return
+
+    # # Если идет Hard-режим викторины
+    # if user_data.get('difficulty') == 'hard':
+    #     logger.info(
+    #         'Определен режим Hard. Передача в обработчик handle_text_answer.'
+    #     )
+    #     await quiz_answer_handlers.handle_text_answer(update, context)
+    #     return
+
+    await quiz_answer_handlers.handle_text_answer(update, context)
+    return
+
+    # Если ни одно из условий не подошло, игнорируем сообщение
+    # logger.warning(f'Неожиданный ввод: {update.message.text}')
+
+
 async def handle_generic_callback(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает универсальный callback-запрос"""
+
+    logger.info('Запуск handle_generic_callback')
 
     query = context_helpers.get_callback_query(update)
     if not query:

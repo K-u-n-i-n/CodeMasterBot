@@ -12,10 +12,16 @@ from telegram.ext import (
     CommandHandler,
     MessageHandler,
     CallbackQueryHandler,
-    filters,
+    filters
 )
 
-from bot.handlers import handlers, utils, commands, notifications
+from bot.handlers import (
+    handlers,
+    utils,
+    commands,
+    notifications,
+    quiz_mode_handlers,
+)
 from bot.init import get_bot_application
 
 
@@ -24,7 +30,8 @@ load_dotenv()
 WEBHOOK_URL = os.getenv('WEBHOOK_URL')
 
 logging.basicConfig(
-    level=logging.INFO,
+    # level=logging.INFO,
+    level=logging.WARNING,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         # logging.FileHandler('app.log'),
@@ -55,10 +62,10 @@ class Command(BaseCommand):
             filters.TEXT & filters.Regex('^Бросить кубик$'),
             commands.roll_dice_command))
 
-        # Обработчик для ввода времени уведомлений
+        # Обработчики текстовых сообщений
         application.add_handler(MessageHandler(
             filters.TEXT & ~filters.COMMAND,
-            notifications.handle_notification_time_input
+            handlers.handle_user_input
         ))
 
         # Обработчики callback запросов
@@ -85,6 +92,10 @@ class Command(BaseCommand):
         application.add_handler(CallbackQueryHandler(
             notifications.handle_set_notification_time,
             pattern='^set_notification_time$'
+        ))
+        application.add_handler(CallbackQueryHandler(
+            quiz_mode_handlers.handle_quiz_mode_selection,
+            pattern='^quiz_mode_'
         ))
         application.add_handler(CallbackQueryHandler(
             handlers.handle_question_answer, pattern='^(?!not_implemented).*'))

@@ -58,6 +58,8 @@ async def handle_set_notification_time(
 ) -> None:
     """Обрабатывает нажатие кнопки 'Настроить время'."""
 
+    logger.info('Начало обработки запроса на настройку времени уведомлений.')
+
     query = context_helpers.get_callback_query(update)
     if not query:
         return
@@ -79,6 +81,8 @@ async def handle_set_notification_time(
 async def handle_notification_time_input(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает ввод времени для уведомлений."""
+
+    logger.info('Начало обработки ввода времени уведомлений.')
 
     if context.user_data is None or not context.user_data.get(
         'awaiting_notification_time'

@@ -67,6 +67,8 @@ async def daily_task(context: CallbackContext) -> None:
 def get_random_questions(queryset, count: int) -> list:
     """Получение случайных вопросов из QuerySet."""
 
+    logger.info(f'Получение {count} случайных вопросов из QuerySet.')
+
     ids = list(queryset.values_list('id', flat=True))
     selected_ids = random.sample(ids, min(count, len(ids)))
     return list(queryset.filter(id__in=selected_ids))
@@ -75,6 +77,8 @@ def get_random_questions(queryset, count: int) -> list:
 @sync_to_async
 def get_all_names_except(excluded_ids: list | int) -> list:
     """Получение всех значений поля name, исключая переданные id."""
+
+    logger.info('Получение всех значений поля name, исключая переданные id.')
 
     # Преобразуем одиночное значение в список
     if isinstance(excluded_ids, int):
@@ -92,6 +96,8 @@ def get_all_names_except(excluded_ids: list | int) -> list:
 async def get_chosen_topic(query: CallbackQuery) -> str | None:
     """Определяет выбранную тему по query.data."""
 
+    logger.info('Определение выбранной темы по query.data.')
+
     if query.data is None:
         logger.error('Данные callback_query отсутствуют (query.data is None).')
         return None
@@ -101,6 +107,8 @@ async def get_chosen_topic(query: CallbackQuery) -> str | None:
 async def send_response_message(
         query: CallbackQuery, text: str, reply_markup=None) -> None:
     """Отправляет сообщение пользователю."""
+
+    logger.info('Отправка сообщения пользователю.')
 
     if query and isinstance(query.message, Message):
         await query.message.reply_text(text, reply_markup=reply_markup)
