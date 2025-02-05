@@ -13,9 +13,10 @@ menu_keyboard = InlineKeyboardMarkup([
     [
         InlineKeyboardButton('Настроить бота', callback_data='conf'),
         InlineKeyboardButton('Информация о боте', url=HELP_URL),
+    ], [
+        InlineKeyboardButton('Зарегистрироваться',
+                             callback_data='registration')
     ],
-    [InlineKeyboardButton('Мои настройки', callback_data='my_settings')],
-    [InlineKeyboardButton('Зарегистрироваться', callback_data='registration')],
 ])
 
 
@@ -23,17 +24,18 @@ menu_keyboard = InlineKeyboardMarkup([
 config_keyboard = InlineKeyboardMarkup([
     [
         InlineKeyboardButton('Сложность', callback_data='complexity'),
-        InlineKeyboardButton('Тема', callback_data='topic'),
-    ], [InlineKeyboardButton('Настроить оповещение', callback_data='notify'),],
-    [InlineKeyboardButton('Мои настройки', callback_data='my_settings')],
+        InlineKeyboardButton('Тема', callback_data='not_implemented'),
+        # InlineKeyboardButton('Тема', callback_data='topic'),
+    ], [InlineKeyboardButton('Настроить оповещение', callback_data='notify'),]
 ])
+
 
 # Клавиатура для выбора сложности викторины
 complexity_keyboard = InlineKeyboardMarkup([
     [
-        InlineKeyboardButton('Easy', callback_data='not_implemented'),
-        InlineKeyboardButton('Hard', callback_data='not_implemented'),
-    ],
+        InlineKeyboardButton('Easy', callback_data='quiz_mode_easy'),
+        InlineKeyboardButton('Hard', callback_data='quiz_mode_hard'),
+    ], [InlineKeyboardButton('Назад', callback_data='conf')],
 ])
 
 # Клавиатура для выбора темы викторины
@@ -41,17 +43,29 @@ topic_keyboard = InlineKeyboardMarkup([
     [
         InlineKeyboardButton(
             'Функции', callback_data='func'),
+        # InlineKeyboardButton(
+        #     'Выражения', callback_data='expressions'),
         InlineKeyboardButton(
-            'Выражения', callback_data='expressions'),
+            'Выражения', callback_data='not_implemented'),
     ],
 ])
 
-
-# Клавиатура для выбора настроек оповещения
+# Клавиатура для вкл/откл оповещения
 notification_keyboard = InlineKeyboardMarkup([
     [
-        InlineKeyboardButton('ВКЛ', callback_data='not_implemented'),
-        InlineKeyboardButton('ВЫКЛ', callback_data='not_implemented'),
-    ],
-    [InlineKeyboardButton('Настроить время', callback_data='not_implemented'),]
+        InlineKeyboardButton('ВКЛ', callback_data='notifications_on'),
+        InlineKeyboardButton('ВЫКЛ', callback_data='notifications_off'),
+    ], [
+        InlineKeyboardButton(
+            'Настроить время', callback_data='set_notification_time'),
+    ]
+])
+
+# Клавиатура для настройки времени оповещения
+notification_time_keyboard = InlineKeyboardMarkup([
+    [
+        InlineKeyboardButton('Назад', callback_data='conf'),
+        InlineKeyboardButton(
+            'Настроить время', callback_data='set_notification_time')
+    ]
 ])

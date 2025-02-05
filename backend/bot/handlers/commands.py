@@ -16,6 +16,8 @@ logger = logging.getLogger(__name__)
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработчик команды /start"""
 
+    logger.info('Запуск start')
+
     if update.message is None:
         return
 
@@ -38,6 +40,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработчик для кнопки Меню"""
 
+    logger.info('Запуск menu_command')
+
     if update.message is None:
         return
 
@@ -49,14 +53,17 @@ async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def roll_dice_command(update: Update, context: CallbackContext):
     """Обработчик для Reply-кнопки (Бросить кубик)"""
 
+    logger.info('Запуск roll_dice_command')
+
     if update.message is None:
         return
 
-    logger.info('Запуск roll_dice_command')
     await update.message.reply_dice()
 
 
 async def quiz_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработчик для Reply-кнопки (Викторина)"""
+
+    logger.info('Запуск quiz_command')
 
     await handle_quiz_start(update, context)

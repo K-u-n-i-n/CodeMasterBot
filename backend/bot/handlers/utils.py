@@ -4,8 +4,8 @@
 """
 
 import logging
-import os
 import random
+from datetime import datetime, timezone
 
 from asgiref.sync import sync_to_async
 from telegram import (
@@ -14,7 +14,7 @@ from telegram import (
 )
 from telegram.ext import CallbackContext
 
-from bot.models import Question
+from bot.models import Question, UserSettings
 
 logger = logging.getLogger(__name__)
 
@@ -25,18 +25,49 @@ TOPIC_MAPPING = {
 
 
 async def daily_task(context: CallbackContext) -> None:
-    """Ежедневная задача, отправляющая напоминание в указанный чат."""
+    """
+    Ежедневная задача, отправляющая напоминание пользователям
+    с включенными уведомлениями.
+    """
 
     logger.info('Запуск daily_task')
-    chat_id = os.getenv('BOOS_CHAT_ID')
-    await context.bot.send_message(
-        chat_id=chat_id, text='Не забудь повторить теорию!'
-    )
+
+    users_with_notifications = await sync_to_async(
+        lambda: list(
+            UserSettings.objects.filter(notification=True)
+            .select_related('user')
+        )
+    )()
+
+    for settings in users_with_notifications:
+        user = settings.user
+        notification_time = settings.notification_time
+
+        now_utc = datetime.now(timezone.utc).time()
+        if (
+            now_utc.hour == notification_time.hour
+            and now_utc.minute == notification_time.minute
+        ):
+            try:
+                await context.bot.send_message(
+                    chat_id=user.user_id,
+                    text='Не забудь повторить теорию!'
+                )
+                logger.info(
+                    f'Уведомление отправлено пользователю {user.user_id}.'
+                )
+            except Exception as e:
+                logger.error(
+                    'Ошибка при отправке уведомления'
+                    f' пользователю {user.user_id}: {e}'
+                )
 
 
 @sync_to_async
 def get_random_questions(queryset, count: int) -> list:
     """Получение случайных вопросов из QuerySet."""
+
+    logger.info(f'Получение {count} случайных вопросов из QuerySet.')
 
     ids = list(queryset.values_list('id', flat=True))
     selected_ids = random.sample(ids, min(count, len(ids)))
@@ -46,6 +77,8 @@ def get_random_questions(queryset, count: int) -> list:
 @sync_to_async
 def get_all_names_except(excluded_ids: list | int) -> list:
     """Получение всех значений поля name, исключая переданные id."""
+
+    logger.info('Получение всех значений поля name, исключая переданные id.')
 
     # Преобразуем одиночное значение в список
     if isinstance(excluded_ids, int):
@@ -63,6 +96,8 @@ def get_all_names_except(excluded_ids: list | int) -> list:
 async def get_chosen_topic(query: CallbackQuery) -> str | None:
     """Определяет выбранную тему по query.data."""
 
+    logger.info('Определение выбранной темы по query.data.')
+
     if query.data is None:
         logger.error('Данные callback_query отсутствуют (query.data is None).')
         return None
@@ -72,6 +107,8 @@ async def get_chosen_topic(query: CallbackQuery) -> str | None:
 async def send_response_message(
         query: CallbackQuery, text: str, reply_markup=None) -> None:
     """Отправляет сообщение пользователю."""
+
+    logger.info('Отправка сообщения пользователю.')
 
     if query and isinstance(query.message, Message):
         await query.message.reply_text(text, reply_markup=reply_markup)

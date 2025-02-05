@@ -13,6 +13,8 @@ from bot.handlers import (
     db_helpers,
     context_helpers,
     messages,
+    notifications,
+    quiz_answer_handlers,
     quiz_helpers,
     utils
 )
@@ -20,7 +22,6 @@ from bot.models import CustomUser, UserSettings
 from .keyboards import (
     config_keyboard,
     complexity_keyboard,
-    menu_keyboard,
     notification_keyboard,
     topic_keyboard,
 )
@@ -32,20 +33,44 @@ async def handle_config(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает настройку бота"""
 
+    logger.info('Запуск handle_config')
+
     query = context_helpers.get_callback_query(update)
     if not query:
         return
 
+    user_id = query.from_user.id
+    settings, has_settings = await db_helpers.get_user_settings(user_id)
+    keyboard = config_keyboard
+
+    if not has_settings:
+        text = 'У вас пока нет сохраненных настроек.'
+    else:
+        if isinstance(settings, UserSettings):
+            text = (
+                '📌 <b>Ваши настройки</b>\n\n'
+                '⚙️ <b>Сложность:</b> '
+                f'{settings.difficulty or 'Не настроено'}\n'
+                '🎯 <b>Тема:</b> '
+                f'{settings.tag or 'Не настроено'}\n'
+                '🔔 <b>Оповещение:</b> '
+                f'{'ВКЛ' if settings.notification else 'ВЫКЛ'}\n'
+                '⏰ <b>Время оповещений:</b> '
+                f'{settings.notification_time.strftime("%H:%M")}\n\n'
+                '📢❗🚨 <b>Внимание: время по UTC</b> 📢❗🚨'
+            )
+
     await query.answer()
     await query.edit_message_text(
-        text='Выберите параметр для настройки:',
-        reply_markup=config_keyboard
+        text=text, reply_markup=keyboard, parse_mode='HTML'
     )
 
 
 async def handle_complexity(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает выбор сложности"""
+
+    logger.info('Запуск handle_complexity')
 
     query = context_helpers.get_callback_query(update)
     if not query:
@@ -61,6 +86,8 @@ async def handle_topic_selection(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает выбор темы"""
 
+    logger.info('Запуск handle_topic_selection')
+
     query = context_helpers.get_callback_query(update)
     if not query:
         return
@@ -74,6 +101,8 @@ async def handle_topic_selection(
 async def handle_topic_choice(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает выбор темы викторины и сохраняет её в настройках."""
+
+    logger.info('Запуск handle_topic_choice')
 
     query = context_helpers.get_callback_query(update)
     if not query:
@@ -92,7 +121,7 @@ async def handle_topic_choice(
     chosen_topic = await utils.get_chosen_topic(query)
     if not chosen_topic:
         await utils.send_response_message(
-            query, 'Выбранная тема не найдена. Попробуйте снова.'
+            query, 'Что-то пошло не так. Выбранная тема не найдена.'
         )
         return
 
@@ -105,17 +134,14 @@ async def handle_topic_choice(
         )
         return
 
-    await utils.send_response_message(
-        query,
-        f'Тема викторины обновлена: {chosen_topic}.\n'
-        'Выберите другие настройки или можете проходить викторину.',
-        reply_markup=config_keyboard
-    )
+    await handle_config(update, context)
 
 
 async def handle_notifications_settings(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает запросы, связанные с изменением настроек оповещений"""
+
+    logger.info('Запуск handle_notifications_settings')
 
     query = context_helpers.get_callback_query(update)
     if not query:
@@ -125,43 +151,6 @@ async def handle_notifications_settings(
     await query.edit_message_text(
         text='Выберите параметр для настройки:',
         reply_markup=notification_keyboard
-    )
-
-
-async def handle_my_settings(
-        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Обрабатывает кнопку 'Мои настройки'."""
-
-    logger.info('Начало обработки запроса "Мои настройки".')
-
-    query = context_helpers.get_callback_query(update)
-    if not query:
-        return
-
-    user_id = query.from_user.id
-    settings, has_settings = await db_helpers.get_user_settings(user_id)
-    keyboard = menu_keyboard
-
-    if not has_settings:
-        text = 'У вас пока нет сохраненных настроек.'
-    else:
-        if isinstance(settings, UserSettings):
-            text = (
-                '📌 <b>Ваши настройки</b>\n\n'
-                '🎯 <b>Тема:</b> '
-                f'{settings.tag or 'Не настроено'}\n'
-                '⚙️ <b>Сложность:</b> '
-                f'{settings.difficulty or 'Не настроено'}\n'
-                '🔔 <b>Оповещение:</b> '
-                f'{settings.notification or 'Не настроено'}\n'
-                '⏰ <b>Время оповещений:</b> '
-                f'{settings.notification_time.strftime("%H:%M")}\n\n'
-                '📢❗🚨 <b>Внимание: время по UTC</b> 📢❗🚨'
-            )
-
-    await query.answer()
-    await query.edit_message_text(
-        text=text, reply_markup=keyboard, parse_mode='HTML'
     )
 
 
@@ -227,6 +216,8 @@ async def handle_question_answer(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработка ответа пользователя на текущий вопрос."""
 
+    logger.info('Запуск handle_question_answer')
+
     query = context_helpers.get_callback_query(update)
     if not query:
         return
@@ -272,6 +263,8 @@ async def handle_next_step(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Определяет: задать новый вопрос или завершить викторину."""
 
+    logger.info('Запуск handle_next_step')
+
     if context.user_data is None:
         return None
 
@@ -291,6 +284,8 @@ async def handle_next_step(
 async def handle_end(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработка кнопки 'Завершить викторину'."""
+
+    logger.info('Запуск handle_end')
 
     query = context_helpers.get_callback_query(update)
     if not query:
@@ -345,9 +340,41 @@ async def handle_registration(
         )
 
 
+async def handle_user_input(
+        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Определяет, что ввел пользователь:
+    ответ на вопрос викторины или время уведомления.
+    """
+
+    logger.info('Запуск handle_user_input')
+
+    user_data = context.user_data
+
+    if user_data is not None and user_data.get('awaiting_notification_time'):
+        await notifications.handle_notification_time_input(update, context)
+        return
+
+    # # Если идет Hard-режим викторины
+    # if user_data.get('difficulty') == 'hard':
+    #     logger.info(
+    #         'Определен режим Hard. Передача в обработчик handle_text_answer.'
+    #     )
+    #     await quiz_answer_handlers.handle_text_answer(update, context)
+    #     return
+
+    await quiz_answer_handlers.handle_text_answer(update, context)
+    return
+
+    # Если ни одно из условий не подошло, игнорируем сообщение
+    # logger.warning(f'Неожиданный ввод: {update.message.text}')
+
+
 async def handle_generic_callback(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает универсальный callback-запрос"""
+
+    logger.info('Запуск handle_generic_callback')
 
     query = context_helpers.get_callback_query(update)
     if not query:
@@ -355,5 +382,6 @@ async def handle_generic_callback(
 
     await query.answer()
     await query.edit_message_text(
-        text='Эта функция в данный момент не реализована.'
+        text='Эта функция в данный момент не реализована.',
+        reply_markup=config_keyboard
     )

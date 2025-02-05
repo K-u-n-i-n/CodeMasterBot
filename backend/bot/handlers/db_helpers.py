@@ -21,10 +21,12 @@ DEFAULT_SETTINGS_USER = {
 async def get_user_from_db(user_id: int) -> CustomUser | None:
     """Получает пользователя из базы данных."""
 
+    logger.info(f'Получение пользователя с id {user_id} из бд.')
+
     try:
         return await sync_to_async(CustomUser.objects.get)(user_id=user_id)
     except ObjectDoesNotExist:
-        logger.warning(f'Пользователь с id {user_id} не найден.')
+        logger.warning(f'Пользователь с id {user_id} в бд не найден.')
         return None
     except Exception as e:
         logger.error(f'Ошибка при получении пользователя: {e}')
@@ -33,6 +35,10 @@ async def get_user_from_db(user_id: int) -> CustomUser | None:
 
 async def get_or_create_user_settings(user: CustomUser) -> UserSettings:
     """Получает или создаёт объект UserSettings для пользователя."""
+
+    logger.info(
+        f'Получение или создание настроек пользователя {user.id} из бд.'
+    )
 
     settings, created = await sync_to_async(
         UserSettings.objects.get_or_create)(user=user)
@@ -44,6 +50,10 @@ async def get_or_create_user_settings(user: CustomUser) -> UserSettings:
 
 async def update_user_topic(settings: UserSettings, tag_name: str) -> bool:
     """Обновляет тему в настройках пользователя."""
+
+    logger.info(
+        f'Обновление темы в настройках пользователя {settings.user.id}.'
+    )
 
     try:
         tag = await sync_to_async(Tag.objects.get)(name=tag_name)
@@ -62,6 +72,8 @@ async def get_user_settings(
     Если пользователя нет в БД или в UserSettings,
     возвращает глобальные настройки.
     """
+
+    logger.info(f'Получение настроек пользователя с ID {user_id} из БД')
 
     try:
         user = await CustomUser.objects.aget(user_id=user_id)
@@ -85,6 +97,8 @@ async def get_user_settings(
 async def get_random_questions_by_tag(
         count: int, tag_slug: str) -> List[Question]:
     """Получает случайные вопросы по указанному тегу."""
+
+    logger.info(f'Получение случайных вопросов по тегу {tag_slug}.')
 
     queryset = Question.objects.filter(tags__slug=tag_slug)
     return await utils.get_random_questions(queryset, count)

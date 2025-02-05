@@ -6,7 +6,6 @@ import logging
 import os
 
 from dotenv import load_dotenv
-from datetime import time
 
 from django.core.management.base import BaseCommand
 from telegram.ext import (
@@ -16,7 +15,13 @@ from telegram.ext import (
     filters
 )
 
-from bot.handlers import handlers, utils, commands
+from bot.handlers import (
+    handlers,
+    utils,
+    commands,
+    notifications,
+    quiz_mode_handlers,
+)
 from bot.init import get_bot_application
 
 
@@ -25,7 +30,8 @@ load_dotenv()
 WEBHOOK_URL = os.getenv('WEBHOOK_URL')
 
 logging.basicConfig(
-    level=logging.INFO,
+    # level=logging.INFO,
+    level=logging.WARNING,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         # logging.FileHandler('app.log'),
@@ -56,6 +62,12 @@ class Command(BaseCommand):
             filters.TEXT & filters.Regex('^Бросить кубик$'),
             commands.roll_dice_command))
 
+        # Обработчики текстовых сообщений
+        application.add_handler(MessageHandler(
+            filters.TEXT & ~filters.COMMAND,
+            handlers.handle_user_input
+        ))
+
         # Обработчики callback запросов
         application.add_handler(CallbackQueryHandler(
             handlers.handle_config, pattern='^conf$'))
@@ -74,7 +86,17 @@ class Command(BaseCommand):
         application.add_handler(CallbackQueryHandler(
             handlers.handle_topic_choice, pattern='^(func|expressions)$'))
         application.add_handler(CallbackQueryHandler(
-             handlers.handle_my_settings, pattern='^my_settings$'))
+            notifications.handle_notification_toggle,
+            pattern='^(notifications_on|notifications_off)$'
+        ))
+        application.add_handler(CallbackQueryHandler(
+            notifications.handle_set_notification_time,
+            pattern='^set_notification_time$'
+        ))
+        application.add_handler(CallbackQueryHandler(
+            quiz_mode_handlers.handle_quiz_mode_selection,
+            pattern='^quiz_mode_'
+        ))
         application.add_handler(CallbackQueryHandler(
             handlers.handle_question_answer, pattern='^(?!not_implemented).*'))
 
@@ -86,32 +108,31 @@ class Command(BaseCommand):
         job_queue = application.job_queue
 
         # Планирование ежедневной задачи
-        job_queue.run_daily(
-            utils.daily_task, time=time(hour=6, minute=0, second=0),
-            name='daily_task'
+        job_queue.run_repeating(
+            utils.daily_task, interval=60, first=0, name='daily_task'
         )
 
         # # Запуск Polling, если не используется Webhook
         # async def delete_webhook():  # Функция для удаления Webhook
         #     await application.bot.delete_webhook()
-        #     logger.info("Webhook удален!")
-
+        #     logger.info('Webhook удален!')
         # application.run_polling()
 
         # Код для запуска бота в режиме Webhook
         async def set_webhook():
             if not WEBHOOK_URL:
-                logger.error("Ошибка: WEBHOOK_URL не установлен!")
+                logger.error('Ошибка: WEBHOOK_URL не установлен!')
                 return
 
             try:
                 success = await application.bot.set_webhook(WEBHOOK_URL)
                 if success:
-                    logger.info(f"Webhook успешно установлен: {WEBHOOK_URL}")
+                    logger.info(
+                        f'Webhook успешно установлен: {WEBHOOK_URL}')
                 else:
-                    logger.error("Ошибка при установке Webhook!")
+                    logger.error('Ошибка при установке Webhook!')
             except Exception as e:
-                logger.error(f"Ошибка Webhook: {e}")
+                logger.error(f'Ошибка Webhook: {e}')
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)

@@ -90,17 +90,19 @@ class Question(models.Model):
 
 
 class UserSettings(models.Model):
+
     user = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE,
         related_name='settings'
     )
     tag = models.ForeignKey(
         Tag, on_delete=models.SET_NULL,
-        null=True, blank=True
+        null=True, blank=True,
+        default=1, verbose_name='Тема'
     )
     difficulty = models.CharField(
         max_length=20, blank=True, null=True,
-        verbose_name='Уровень сложности'
+        default='easy', verbose_name='Уровень сложности'
     )
     notification = models.BooleanField(
         default=False, verbose_name='Состояние уведомлений'

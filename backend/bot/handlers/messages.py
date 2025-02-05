@@ -13,12 +13,14 @@ def get_safe_message(update: Update) -> Optional[Message]:
     пытается вернуть update.callback_query.message.
     """
 
+    logger.info('Получение сообщения из update...')
+
     if update.message:
         return update.message
     elif update.callback_query and update.callback_query.message:
         return cast(Message, update.callback_query.message)
     else:
-        logger.error("Не удалось получить сообщение из update.")
+        logger.error('Не удалось получить сообщение из update.')
         return None
 
 
@@ -27,6 +29,8 @@ async def send_message(update: Update, text: str) -> None:
     Отправляет сообщение с заданным текстом,
     используя безопасное извлечение объекта Message.
     """
+
+    logger.info('Отправка сообщения...')
 
     message = get_safe_message(update)
     if message:
@@ -41,6 +45,8 @@ async def send_message(update: Update, text: str) -> None:
 async def send_no_questions_message(update: Update) -> None:
     """Отправляет сообщение о том, что вопросов нет."""
 
+    logger.info('Отправка сообщения о том, что вопросов нет...')
+
     await send_message(
         update,
         'К сожалению, в этой теме вопросов нет. 😔\n'
@@ -50,6 +56,8 @@ async def send_no_questions_message(update: Update) -> None:
 
 async def send_error_message(update: Update) -> None:
     """Отправляет сообщение об ошибке."""
+
+    logger.info('Отправка сообщения об ошибке...')
 
     await send_message(
         update,
