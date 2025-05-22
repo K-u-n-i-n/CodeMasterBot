@@ -6,22 +6,23 @@
 import logging
 
 from asgiref.sync import sync_to_async
-from telegram import Update, Message
+from telegram import Message, Update
 from telegram.ext import ContextTypes
 
 from bot.handlers import (
-    db_helpers,
     context_helpers,
+    db_helpers,
     messages,
     notifications,
     quiz_answer_handlers,
     quiz_helpers,
-    utils
+    utils,
 )
 from bot.models import CustomUser, UserSettings
+
 from .keyboards import (
-    config_keyboard,
     complexity_keyboard,
+    config_keyboard,
     notification_keyboard,
     topic_keyboard,
 )
