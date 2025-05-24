@@ -1,7 +1,7 @@
 import logging
-
-from telegram import Update, Message
 from typing import Optional, cast
+
+from telegram import Message, Update
 
 logger = logging.getLogger(__name__)
 

@@ -82,4 +82,3 @@ docstring-code-line-length = 79  # Ширина строки для кода в 
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"  # Используем Google стиль для документации
-quote-style = "double"  # Двойные кавычки для docstrings

@@ -4,8 +4,8 @@
 
 import logging
 
-from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
-from telegram.ext import ContextTypes, CallbackContext
+from telegram import KeyboardButton, ReplyKeyboardMarkup, Update
+from telegram.ext import CallbackContext, ContextTypes
 
 from .handlers import handle_quiz_start
 from .keyboards import menu_keyboard

@@ -1,14 +1,13 @@
 """Функции работы с БД"""
 
 import logging
+from typing import List, Tuple, Union
 
 from asgiref.sync import sync_to_async
 from django.core.exceptions import ObjectDoesNotExist
-from typing import Tuple, Union, List
 
 from bot.handlers import utils
 from bot.models import CustomUser, Question, Tag, UserSettings
-
 
 logger = logging.getLogger(__name__)
 
