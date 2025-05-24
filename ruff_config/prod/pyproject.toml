@@ -71,3 +71,15 @@ target-version = "py312"
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
+
+[tool.ruff.format]
+line-ending = "lf"  # Использовать LF для окончаний строк
+quote-style = "single"  # Одинарные кавычки для строк
+indent-style = "space"  # Использовать пробелы для отступов
+skip-magic-trailing-comma = false  # Не пропускать автоматическое добавление запятых
+docstring-code-format = true  # Форматировать код в docstrings
+docstring-code-line-length = 79  # Ширина строки для кода в docstrings
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"  # Используем Google стиль для документации
+quote-style = "double"  # Двойные кавычки для docstrings
