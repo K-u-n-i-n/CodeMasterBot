@@ -153,3 +153,4 @@ media/
 
 # прочее
 questions_prod.csv
+ruff_config/personal/

@@ -1,18 +1,17 @@
 import logging
 import random
+from typing import List
 
 from telegram import (
-    Message,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
+    Message,
     Update,
 )
 from telegram.ext import ContextTypes
-from typing import List
 
+from bot.handlers import db_helpers, utils
 from bot.handlers.static_data import STICKERS
-from bot.handlers import utils, db_helpers
-
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +36,8 @@ async def create_keyboard(options: List[str]) -> InlineKeyboardMarkup:
         [InlineKeyboardButton(
             option, callback_data=option)] for option in options
     ] + [
-        [InlineKeyboardButton('⛔ Завершить викторину ⛔', callback_data='end')]
+        [InlineKeyboardButton(
+            '⛔ Завершить викторину ⛔', callback_data='end')]
     ])
 
 

@@ -1,10 +1,6 @@
 from django.contrib import admin
 
-from .models import (
-    CustomUser,
-    Tag,
-    Question
-)
+from .models import CustomUser, Question, Tag
 
 
 @admin.register(CustomUser)

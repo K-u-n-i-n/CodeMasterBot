@@ -3,7 +3,6 @@ import logging
 from django.conf import settings
 from telegram.ext import ApplicationBuilder
 
-
 logger = logging.getLogger(__name__)
 
 

@@ -5,25 +5,23 @@ import asyncio
 import logging
 import os
 
-from dotenv import load_dotenv
-
 from django.core.management.base import BaseCommand
+from dotenv import load_dotenv
 from telegram.ext import (
+    CallbackQueryHandler,
     CommandHandler,
     MessageHandler,
-    CallbackQueryHandler,
-    filters
+    filters,
 )
 
 from bot.handlers import (
-    handlers,
-    utils,
     commands,
+    handlers,
     notifications,
     quiz_mode_handlers,
+    utils,
 )
 from bot.init import get_bot_application
-
 
 load_dotenv()
 

@@ -1,9 +1,9 @@
 """Логика работы с контекстом"""
 
 import logging
-from typing import Union, List, Optional
+from typing import List, Optional, Union
 
-from telegram import Update, CallbackQuery
+from telegram import CallbackQuery, Update
 from telegram.ext import ContextTypes
 
 from bot.models import Question
