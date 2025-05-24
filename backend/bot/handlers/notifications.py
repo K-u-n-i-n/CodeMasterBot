@@ -39,14 +39,14 @@ async def handle_notification_toggle(
         settings.notification = True
         await query.edit_message_text(
             text='🔔 Уведомления включены!',
-            reply_markup=keyboards.notification_time_keyboard
+            reply_markup=keyboards.notification_time_keyboard,
         )
 
     elif query.data == 'notifications_off':
         settings.notification = False
         await query.edit_message_text(
             text='🔕 Уведомления отключены.',
-            reply_markup=keyboards.config_keyboard
+            reply_markup=keyboards.config_keyboard,
         )
 
     await sync_to_async(settings.save)()
@@ -66,8 +66,7 @@ async def handle_set_notification_time(
 
     await query.edit_message_text(
         text=(
-            'Введите время для уведомлений в формате '
-            'ЧЧ:ММ (например, 07:00):'
+            'Введите время для уведомлений в формате ЧЧ:ММ (например, 07:00):'
         )
     )
 
@@ -79,7 +78,8 @@ async def handle_set_notification_time(
 
 
 async def handle_notification_time_input(
-        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Обрабатывает ввод времени для уведомлений."""
 
     logger.info('Начало обработки ввода времени уведомлений.')
@@ -111,14 +111,14 @@ async def handle_notification_time_input(
         await message.reply_text(
             'Время уведомлений установлено на '
             f'{notification_time.strftime("%H:%M")} (UTC).',
-            reply_markup=keyboards.notification_time_keyboard
+            reply_markup=keyboards.notification_time_keyboard,
         )
 
     except ValueError:
         await message.reply_text(
             '❌ Некорректный формат времени.\n'
             'Введите время в формате ЧЧ:ММ (например, 07:00).',
-            reply_markup=keyboards.notification_time_keyboard
+            reply_markup=keyboards.notification_time_keyboard,
         )
 
     context.user_data['awaiting_notification_time'] = False

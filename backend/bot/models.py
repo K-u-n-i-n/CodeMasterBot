@@ -7,27 +7,17 @@ from .managers.user_manager import CustomUserManager
 
 
 class CustomUser(AbstractUser):
-
     user_id = models.BigIntegerField(
-        unique=True, editable=False,
-        verbose_name='Telegram ID'
+        unique=True, editable=False, verbose_name='Telegram ID'
     )
-    username = models.CharField(
-        max_length=150, blank=True, null=True
-    )
+    username = models.CharField(max_length=150, blank=True, null=True)
     email = models.EmailField(
-        blank=True, null=True,
-        verbose_name='Электронная почта'
+        blank=True, null=True, verbose_name='Электронная почта'
     )
-    first_name = models.CharField(
-        max_length=150, blank=True, null=True
-    )
-    last_name = models.CharField(
-        max_length=150, blank=True, null=True
-    )
+    first_name = models.CharField(max_length=150, blank=True, null=True)
+    last_name = models.CharField(max_length=150, blank=True, null=True)
     avatar = models.ImageField(
-        upload_to='users/', blank=True,
-        null=True, verbose_name='Аватар'
+        upload_to='users/', blank=True, null=True, verbose_name='Аватар'
     )
 
     USERNAME_FIELD = 'user_id'
@@ -46,14 +36,8 @@ class CustomUser(AbstractUser):
 
 
 class Tag(models.Model):
-
-    name = models.CharField(
-        max_length=32, unique=True,
-        verbose_name='Тема'
-    )
-    slug = models.SlugField(
-        max_length=32, unique=True
-    )
+    name = models.CharField(max_length=32, unique=True, verbose_name='Тема')
+    slug = models.SlugField(max_length=32, unique=True)
 
     class Meta:
         verbose_name = 'Тег'
@@ -64,21 +48,13 @@ class Tag(models.Model):
 
 
 class Question(models.Model):
-
     name = models.CharField(
-        max_length=150, unique=True,
-        verbose_name='Название'
+        max_length=150, unique=True, verbose_name='Название'
     )
-    description = models.TextField(
-        verbose_name='Описание'
-    )
-    syntax = models.TextField(
-        blank=True, null=True,
-        verbose_name='Синтаксис'
-    )
+    description = models.TextField(verbose_name='Описание')
+    syntax = models.TextField(blank=True, null=True, verbose_name='Синтаксис')
     tags = models.ManyToManyField(
-        Tag, related_name='questions_python',
-        verbose_name='Теги'
+        Tag, related_name='questions_python', verbose_name='Теги'
     )
 
     class Meta:
@@ -90,26 +66,29 @@ class Question(models.Model):
 
 
 class UserSettings(models.Model):
-
     user = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE,
-        related_name='settings'
+        CustomUser, on_delete=models.CASCADE, related_name='settings'
     )
     tag = models.ForeignKey(
-        Tag, on_delete=models.SET_NULL,
-        null=True, blank=True,
-        default=1, verbose_name='Тема'
+        Tag,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=1,
+        verbose_name='Тема',
     )
     difficulty = models.CharField(
-        max_length=20, blank=True, null=True,
-        default='easy', verbose_name='Уровень сложности'
+        max_length=20,
+        blank=True,
+        null=True,
+        default='easy',
+        verbose_name='Уровень сложности',
     )
     notification = models.BooleanField(
         default=False, verbose_name='Состояние уведомлений'
     )
     notification_time = models.TimeField(
-        blank=True, default=time(7, 0, 0),
-        verbose_name='Время уведомлений'
+        blank=True, default=time(7, 0, 0), verbose_name='Время уведомлений'
     )
 
     class Meta:
@@ -122,20 +101,16 @@ class UserSettings(models.Model):
         ]
 
     def __str__(self):
-        return (
-            f'Настройки бота для пользователя {self.user}'
-        )
+        return f'Настройки бота для пользователя {self.user}'
 
 
 class UserQuestionStatistic(models.Model):
-
     user = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE,
-        related_name='question_statistics'
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='question_statistics',
     )
-    question = models.ForeignKey(
-        Question, on_delete=models.CASCADE
-    )
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
     attempts = models.IntegerField(default=0)
     correct_attempts = models.IntegerField(default=0)
     last_attempt = models.DateTimeField(null=True, blank=True)

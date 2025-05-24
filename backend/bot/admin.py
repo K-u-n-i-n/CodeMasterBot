@@ -5,7 +5,6 @@ from .models import CustomUser, Question, Tag
 
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
-
     list_display = (
         'user_id',
         'email',
@@ -13,7 +12,7 @@ class CustomUserAdmin(admin.ModelAdmin):
         'first_name',
         'last_name',
         'password',
-        'avatar'
+        'avatar',
     )
     list_editable = (
         'email',
@@ -21,24 +20,16 @@ class CustomUserAdmin(admin.ModelAdmin):
         'first_name',
         'last_name',
         'password',
-        'avatar'
+        'avatar',
     )
-    search_fields = (
-        'user_id',
-        'email',
-        'username'
-    )
+    search_fields = ('user_id', 'email', 'username')
     empty_value_display = 'Не задано'
     list_per_page = 10
 
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-
-    list_display = (
-        'name',
-        'slug'
-    )
+    list_display = ('name', 'slug')
     list_editable = ('slug',)
     search_fields = ('name',)
     list_filter = ('name',)
@@ -46,16 +37,8 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-
-    list_display = (
-        'name',
-        'description',
-        'syntax'
-    )
-    list_editable = (
-        'description',
-        'syntax'
-    )
+    list_display = ('name', 'description', 'syntax')
+    list_editable = ('description', 'syntax')
     autocomplete_fields = ('tags',)
     search_fields = ('name',)
     list_filter = ('tags',)

@@ -34,8 +34,9 @@ async def daily_task(context: CallbackContext) -> None:
 
     users_with_notifications = await sync_to_async(
         lambda: list(
-            UserSettings.objects.filter(notification=True)
-            .select_related('user')
+            UserSettings.objects.filter(notification=True).select_related(
+                'user'
+            )
         )
     )()
 
@@ -50,8 +51,7 @@ async def daily_task(context: CallbackContext) -> None:
         ):
             try:
                 await context.bot.send_message(
-                    chat_id=user.user_id,
-                    text='Не забудь повторить теорию!'
+                    chat_id=user.user_id, text='Не забудь повторить теорию!'
                 )
                 logger.info(
                     f'Уведомление отправлено пользователю {user.user_id}.'
@@ -88,8 +88,9 @@ def get_all_names_except(excluded_ids: list | int) -> list:
         raise ValueError('excluded_ids должен быть int или list[int]')
 
     return list(
-        Question.objects.exclude(
-            id__in=excluded_ids).values_list('name', flat=True)
+        Question.objects.exclude(id__in=excluded_ids).values_list(
+            'name', flat=True
+        )
     )
 
 
@@ -105,7 +106,8 @@ async def get_chosen_topic(query: CallbackQuery) -> str | None:
 
 
 async def send_response_message(
-        query: CallbackQuery, text: str, reply_markup=None) -> None:
+    query: CallbackQuery, text: str, reply_markup=None
+) -> None:
     """Отправляет сообщение пользователю."""
 
     logger.info('Отправка сообщения пользователю.')

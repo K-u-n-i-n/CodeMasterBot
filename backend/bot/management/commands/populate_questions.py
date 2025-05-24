@@ -32,7 +32,8 @@ class Command(BaseCommand):
                     self.stderr.write(
                         self.style.WARNING(
                             f'Пропуск строки: {
-                                row} (отсутствует обязательное поле)'
+                                row
+                            } (отсутствует обязательное поле)'
                         )
                     )
                     continue
@@ -40,18 +41,17 @@ class Command(BaseCommand):
                 # Создаем вопрос (если он не существует)
                 question, created = Question.objects.get_or_create(
                     name=name,
-                    defaults={
-                        'description': description,
-                        'syntax': syntax
-                    }
+                    defaults={'description': description, 'syntax': syntax},
                 )
 
                 if created:
-                    self.stdout.write(self.style.SUCCESS(
-                        f'Добавлен вопрос: {name}'))
+                    self.stdout.write(
+                        self.style.SUCCESS(f'Добавлен вопрос: {name}')
+                    )
                 else:
                     self.stdout.write(
-                        f'Вопрос {name} уже существует. Пропуск.')
+                        f'Вопрос {name} уже существует. Пропуск.'
+                    )
 
                 # Добавляем теги к вопросу
                 for tag_name in tags:
@@ -64,6 +64,8 @@ class Command(BaseCommand):
                         except Tag.DoesNotExist:
                             self.stderr.write(
                                 self.style.WARNING(
-                                    f'Тег "{tag_name}" не найден. Пропуск.'))
+                                    f'Тег "{tag_name}" не найден. Пропуск.'
+                                )
+                            )
 
         self.stdout.write(self.style.SUCCESS('Импорт завершён!'))

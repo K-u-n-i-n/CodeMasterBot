@@ -31,7 +31,8 @@ logger = logging.getLogger(__name__)
 
 
 async def handle_config(
-        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Обрабатывает настройку бота"""
 
     logger.info('Запуск handle_config')
@@ -51,11 +52,11 @@ async def handle_config(
             text = (
                 '📌 <b>Ваши настройки</b>\n\n'
                 '⚙️ <b>Сложность:</b> '
-                f'{settings.difficulty or 'Не настроено'}\n'
+                f'{settings.difficulty or "Не настроено"}\n'
                 '🎯 <b>Тема:</b> '
-                f'{settings.tag or 'Не настроено'}\n'
+                f'{settings.tag or "Не настроено"}\n'
                 '🔔 <b>Оповещение:</b> '
-                f'{'ВКЛ' if settings.notification else 'ВЫКЛ'}\n'
+                f'{"ВКЛ" if settings.notification else "ВЫКЛ"}\n'
                 '⏰ <b>Время оповещений:</b> '
                 f'{settings.notification_time.strftime("%H:%M")}\n\n'
                 '📢❗🚨 <b>Внимание: время по UTC</b> 📢❗🚨'
@@ -68,7 +69,8 @@ async def handle_config(
 
 
 async def handle_complexity(
-        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Обрабатывает выбор сложности"""
 
     logger.info('Запуск handle_complexity')
@@ -84,7 +86,8 @@ async def handle_complexity(
 
 
 async def handle_topic_selection(
-        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Обрабатывает выбор темы"""
 
     logger.info('Запуск handle_topic_selection')
@@ -100,7 +103,8 @@ async def handle_topic_selection(
 
 
 async def handle_topic_choice(
-        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Обрабатывает выбор темы викторины и сохраняет её в настройках."""
 
     logger.info('Запуск handle_topic_choice')
@@ -139,7 +143,8 @@ async def handle_topic_choice(
 
 
 async def handle_notifications_settings(
-        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Обрабатывает запросы, связанные с изменением настроек оповещений"""
 
     logger.info('Запуск handle_notifications_settings')
@@ -151,12 +156,13 @@ async def handle_notifications_settings(
     await query.answer()
     await query.edit_message_text(
         text='Выберите параметр для настройки:',
-        reply_markup=notification_keyboard
+        reply_markup=notification_keyboard,
     )
 
 
 async def handle_quiz_start(
-        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Начало викторины."""
 
     logger.info('Начало обработки запроса "Викторина".')
@@ -171,8 +177,8 @@ async def handle_quiz_start(
         return
 
     user_id = update.effective_user.id
-    user_settings, has_personal_settings = (
-        await db_helpers.get_user_settings(user_id)
+    user_settings, has_personal_settings = await db_helpers.get_user_settings(
+        user_id
     )
 
     if not has_personal_settings:
@@ -197,7 +203,8 @@ async def handle_quiz_start(
             tag_slug = db_helpers.DEFAULT_SETTINGS_USER['tag']
 
     random_questions = await db_helpers.get_random_questions_by_tag(
-        10, tag_slug=tag_slug)
+        10, tag_slug=tag_slug
+    )
     if not random_questions:
         await messages.send_no_questions_message(update)
         return
@@ -205,7 +212,8 @@ async def handle_quiz_start(
     await context_helpers.prepare_quiz_context(context, random_questions)
 
     next_question = await context_helpers.get_next_question_from_context(
-        context)
+        context
+    )
     if not next_question:
         await messages.send_error_message(update)
         return
@@ -214,7 +222,8 @@ async def handle_quiz_start(
 
 
 async def handle_question_answer(
-        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Обработка ответа пользователя на текущий вопрос."""
 
     logger.info('Запуск handle_question_answer')
@@ -261,7 +270,8 @@ async def handle_question_answer(
 
 
 async def handle_next_step(
-        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Определяет: задать новый вопрос или завершить викторину."""
 
     logger.info('Запуск handle_next_step')
@@ -270,8 +280,11 @@ async def handle_next_step(
         return None
 
     if context.user_data and 'quiz_questions' in context.user_data:
-        next_question = context.user_data['quiz_questions'].pop(
-            0) if context.user_data['quiz_questions'] else None
+        next_question = (
+            context.user_data['quiz_questions'].pop(0)
+            if context.user_data['quiz_questions']
+            else None
+        )
     else:
         next_question = None
 
@@ -283,7 +296,8 @@ async def handle_next_step(
 
 
 async def handle_end(
-        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Обработка кнопки 'Завершить викторину'."""
 
     logger.info('Запуск handle_end')
@@ -300,7 +314,8 @@ async def handle_end(
 
 
 async def handle_registration(
-        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Обрабатывает регистрацию пользователя"""
 
     logger.info('Запуск handle_registration')
@@ -324,8 +339,9 @@ async def handle_registration(
     telegram_id = update.effective_user.id
     username = update.effective_user.username
 
-    user, created = await sync_to_async(
-        CustomUser.objects.get_or_create)(user_id=telegram_id)
+    user, created = await sync_to_async(CustomUser.objects.get_or_create)(
+        user_id=telegram_id
+    )
 
     if not isinstance(update.callback_query.message, Message):
         logger.warning('callback_query.message не является объектом Message.')
@@ -342,7 +358,8 @@ async def handle_registration(
 
 
 async def handle_user_input(
-        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """
     Определяет, что ввел пользователь:
     ответ на вопрос викторины или время уведомления.
@@ -372,7 +389,8 @@ async def handle_user_input(
 
 
 async def handle_generic_callback(
-        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """Обрабатывает универсальный callback-запрос"""
 
     logger.info('Запуск handle_generic_callback')
@@ -384,5 +402,5 @@ async def handle_generic_callback(
     await query.answer()
     await query.edit_message_text(
         text='Эта функция в данный момент не реализована.',
-        reply_markup=config_keyboard
+        reply_markup=config_keyboard,
     )

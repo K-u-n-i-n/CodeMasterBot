@@ -10,7 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 async def handle_quiz_mode_selection(
-        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """
     Обработка нажатия кнопки выбора режима викторины.
     callback_data: 'quiz_mode_easy' или 'quiz_mode_hard'
@@ -55,5 +56,5 @@ async def handle_quiz_mode_selection(
     logger.info(f'Установлен режим: {new_mode}')
     await query.edit_message_text(
         f'Режим викторины установлен на {new_mode}.',
-        reply_markup=keyboards.complexity_keyboard
+        reply_markup=keyboards.complexity_keyboard,
     )

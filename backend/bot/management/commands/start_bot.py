@@ -1,6 +1,7 @@
 """
 Запуск бота и добавление обработчиков и задач.
 """
+
 import asyncio
 import logging
 import os
@@ -34,7 +35,7 @@ logging.basicConfig(
     handlers=[
         # logging.FileHandler('app.log'),
         logging.StreamHandler(),
-    ]
+    ],
 )
 
 logger = logging.getLogger(__name__)
@@ -50,57 +51,99 @@ class Command(BaseCommand):
         application.add_handler(CommandHandler('start', commands.start))
 
         # Обработчики Reply кнопок
-        application.add_handler(MessageHandler(
-            filters.TEXT & filters.Regex('^Меню$'),
-            commands.menu_command))
-        application.add_handler(MessageHandler(
-            filters.TEXT & filters.Regex('^Викторина$'),
-            commands.quiz_command))
-        application.add_handler(MessageHandler(
-            filters.TEXT & filters.Regex('^Бросить кубик$'),
-            commands.roll_dice_command))
+        application.add_handler(
+            MessageHandler(
+                filters.TEXT & filters.Regex('^Меню$'), commands.menu_command
+            )
+        )
+        application.add_handler(
+            MessageHandler(
+                filters.TEXT & filters.Regex('^Викторина$'),
+                commands.quiz_command,
+            )
+        )
+        application.add_handler(
+            MessageHandler(
+                filters.TEXT & filters.Regex('^Бросить кубик$'),
+                commands.roll_dice_command,
+            )
+        )
 
         # Обработчики текстовых сообщений
-        application.add_handler(MessageHandler(
-            filters.TEXT & ~filters.COMMAND,
-            handlers.handle_user_input
-        ))
+        application.add_handler(
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND, handlers.handle_user_input
+            )
+        )
 
         # Обработчики callback запросов
-        application.add_handler(CallbackQueryHandler(
-            handlers.handle_config, pattern='^conf$'))
-        application.add_handler(CallbackQueryHandler(
-            handlers.handle_complexity, pattern='^complexity$'))
-        application.add_handler(CallbackQueryHandler(
-            handlers.handle_topic_selection, pattern='^topic$'))
-        application.add_handler(CallbackQueryHandler(
-            handlers.handle_notifications_settings, pattern='^notify$'))
-        application.add_handler(CallbackQueryHandler(
-            handlers.handle_quiz_start, pattern='^question$'))
-        application.add_handler(CallbackQueryHandler(
-            handlers.handle_registration, pattern='^registration$'))
-        application.add_handler(CallbackQueryHandler(
-            handlers.handle_end, pattern='^end$'))
-        application.add_handler(CallbackQueryHandler(
-            handlers.handle_topic_choice, pattern='^(func|expressions)$'))
-        application.add_handler(CallbackQueryHandler(
-            notifications.handle_notification_toggle,
-            pattern='^(notifications_on|notifications_off)$'
-        ))
-        application.add_handler(CallbackQueryHandler(
-            notifications.handle_set_notification_time,
-            pattern='^set_notification_time$'
-        ))
-        application.add_handler(CallbackQueryHandler(
-            quiz_mode_handlers.handle_quiz_mode_selection,
-            pattern='^quiz_mode_'
-        ))
-        application.add_handler(CallbackQueryHandler(
-            handlers.handle_question_answer, pattern='^(?!not_implemented).*'))
+        application.add_handler(
+            CallbackQueryHandler(handlers.handle_config, pattern='^conf$')
+        )
+        application.add_handler(
+            CallbackQueryHandler(
+                handlers.handle_complexity, pattern='^complexity$'
+            )
+        )
+        application.add_handler(
+            CallbackQueryHandler(
+                handlers.handle_topic_selection, pattern='^topic$'
+            )
+        )
+        application.add_handler(
+            CallbackQueryHandler(
+                handlers.handle_notifications_settings, pattern='^notify$'
+            )
+        )
+        application.add_handler(
+            CallbackQueryHandler(
+                handlers.handle_quiz_start, pattern='^question$'
+            )
+        )
+        application.add_handler(
+            CallbackQueryHandler(
+                handlers.handle_registration, pattern='^registration$'
+            )
+        )
+        application.add_handler(
+            CallbackQueryHandler(handlers.handle_end, pattern='^end$')
+        )
+        application.add_handler(
+            CallbackQueryHandler(
+                handlers.handle_topic_choice, pattern='^(func|expressions)$'
+            )
+        )
+        application.add_handler(
+            CallbackQueryHandler(
+                notifications.handle_notification_toggle,
+                pattern='^(notifications_on|notifications_off)$',
+            )
+        )
+        application.add_handler(
+            CallbackQueryHandler(
+                notifications.handle_set_notification_time,
+                pattern='^set_notification_time$',
+            )
+        )
+        application.add_handler(
+            CallbackQueryHandler(
+                quiz_mode_handlers.handle_quiz_mode_selection,
+                pattern='^quiz_mode_',
+            )
+        )
+        application.add_handler(
+            CallbackQueryHandler(
+                handlers.handle_question_answer,
+                pattern='^(?!not_implemented).*',
+            )
+        )
 
         # Обработчик для заглушки (функции, которые еще не реализованы)
-        application.add_handler(CallbackQueryHandler(
-            handlers.handle_generic_callback, pattern='not_implemented'))
+        application.add_handler(
+            CallbackQueryHandler(
+                handlers.handle_generic_callback, pattern='not_implemented'
+            )
+        )
 
         # Настройка очереди заданий
         job_queue = application.job_queue
@@ -125,8 +168,7 @@ class Command(BaseCommand):
             try:
                 success = await application.bot.set_webhook(WEBHOOK_URL)
                 if success:
-                    logger.info(
-                        f'Webhook успешно установлен: {WEBHOOK_URL}')
+                    logger.info(f'Webhook успешно установлен: {WEBHOOK_URL}')
                 else:
                     logger.error('Ошибка при установке Webhook!')
             except Exception as e:
@@ -138,7 +180,5 @@ class Command(BaseCommand):
         loop.run_until_complete(set_webhook())
 
         application.run_webhook(
-            listen='0.0.0.0',
-            port=8443,
-            webhook_url=WEBHOOK_URL
+            listen='0.0.0.0', port=8443, webhook_url=WEBHOOK_URL
         )

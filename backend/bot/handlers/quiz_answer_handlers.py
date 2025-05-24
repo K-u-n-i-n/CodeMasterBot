@@ -9,7 +9,8 @@ logger = logging.getLogger(__name__)
 
 
 async def handle_text_answer(
-        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """
     Обрабатывает текстовый ответ, введённый пользователем в Hard режиме.
     Сравнение производится строго.
