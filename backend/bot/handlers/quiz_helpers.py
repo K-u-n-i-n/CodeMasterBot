@@ -36,7 +36,8 @@ async def create_keyboard(options: List[str]) -> InlineKeyboardMarkup:
         [InlineKeyboardButton(
             option, callback_data=option)] for option in options
     ] + [
-        [InlineKeyboardButton('⛔ Завершить викторину ⛔', callback_data='end')]
+        [InlineKeyboardButton(
+            '⛔ Завершить викторину ⛔', callback_data='end')]
     ])
 
 
