@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 async def get_incorrect_answers(
-        current_question, all_names: List[str], num_answers: int) -> List[str]:
+    current_question, all_names: List[str], num_answers: int
+) -> List[str]:
     """Возвращает случайные неправильные ответы для текущего вопроса."""
 
     logger.info(
@@ -32,26 +33,34 @@ async def create_keyboard(options: List[str]) -> InlineKeyboardMarkup:
 
     logger.info('Создание клавиатуры для выбора ответа.')
 
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton(
-            option, callback_data=option)] for option in options
-    ] + [
-        [InlineKeyboardButton(
-            '⛔ Завершить викторину ⛔', callback_data='end')]
-    ])
+    return InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton(option, callback_data=option)]
+            for option in options
+        ]
+        + [
+            [
+                InlineKeyboardButton(
+                    '⛔ Завершить викторину ⛔', callback_data='end'
+                )
+            ]
+        ]
+    )
 
 
 async def send_question_message(
-    update: Update, current_question,
-        remaining_questions: int,
-        keyboard: InlineKeyboardMarkup
+    update: Update,
+    current_question,
+    remaining_questions: int,
+    keyboard: InlineKeyboardMarkup,
 ) -> None:
     """Отправляет сообщение с вопросом и вариантами ответа."""
 
     logger.info('Отправка сообщения с вопросом и вариантами ответа.')
 
     message = update.message or (
-        update.callback_query.message if update.callback_query else None)
+        update.callback_query.message if update.callback_query else None
+    )
 
     if isinstance(message, Message):
         await message.reply_text(
@@ -66,16 +75,18 @@ async def send_question_message(
 
 
 async def send_hard_question_message(
-    update: Update, current_question,
-        remaining_questions: int,
-        keyboard: InlineKeyboardMarkup
+    update: Update,
+    current_question,
+    remaining_questions: int,
+    keyboard: InlineKeyboardMarkup,
 ) -> None:
     """Отправляет сообщение с вопросом для Hard режима."""
 
     logger.info('Отправка сообщения с вопросом для Hard режима.')
 
     message = update.message or (
-        update.callback_query.message if update.callback_query else None)
+        update.callback_query.message if update.callback_query else None
+    )
 
     if isinstance(message, Message):
         await message.reply_text(
@@ -91,7 +102,8 @@ async def send_hard_question_message(
 
 
 async def ask_next_question(
-        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """
     Выводит следующий вопрос.
     В режиме Easy – отправляет вопрос с вариантами ответа.
@@ -132,7 +144,8 @@ async def ask_next_question(
         if num_incorrect_answers < 3:
             logger.warning(
                 f'Недостаточно неправильных вариантов для вопроса {
-                    current_question.id}.'
+                    current_question.id
+                }.'
             )
         incorrect_answers = await get_incorrect_answers(
             current_question, all_names, num_incorrect_answers
@@ -149,13 +162,17 @@ async def ask_next_question(
         logger.info(f'Режим викторины: {difficulty} в обработке.')
         remaining_questions = len(context.user_data.get('quiz_questions', []))
 
-        keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton(
-                '⛔ Завершить викторину ⛔', callback_data='end')]
-        ])
+        keyboard = InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton(
+                        '⛔ Завершить викторину ⛔', callback_data='end'
+                    )
+                ]
+            ]
+        )
         await send_hard_question_message(
-            update, current_question,
-            remaining_questions, keyboard
+            update, current_question, remaining_questions, keyboard
         )
 
     else:
@@ -168,7 +185,8 @@ async def ask_next_question(
         if num_incorrect_answers < 3:
             logger.warning(
                 f'Недостаточно неправильных вариантов для вопроса {
-                    current_question.id}.'
+                    current_question.id
+                }.'
             )
         incorrect_answers = await get_incorrect_answers(
             current_question, all_names, num_incorrect_answers
@@ -183,7 +201,8 @@ async def ask_next_question(
 
 
 async def finish_quiz(
-        update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> None:
     """
     Обрабатывает завершение викторины:
     вывод результата и отправка стикера.
@@ -198,7 +217,8 @@ async def finish_quiz(
     correct_answers = context.user_data.get('correct_answers', 0)
 
     message = update.message or (
-        update.callback_query.message if update.callback_query else None)
+        update.callback_query.message if update.callback_query else None
+    )
     if isinstance(message, Message):
         await message.reply_text(
             '🎉 Викторина завершена!\n\n'

@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 def get_next_question(
-        context: ContextTypes.DEFAULT_TYPE) -> Union[Question, None]:
+    context: ContextTypes.DEFAULT_TYPE,
+) -> Union[Question, None]:
     """
     Получает вопрос, удаляет его из списка и
     возвращает оставшееся количество вопросов.
@@ -36,7 +37,8 @@ def get_next_question(
 
 
 async def prepare_quiz_context(
-        context: ContextTypes.DEFAULT_TYPE, questions: List[Question]) -> None:
+    context: ContextTypes.DEFAULT_TYPE, questions: List[Question]
+) -> None:
     """Сохраняет данные викторины в user_data."""
 
     logger.info('Сохраняет данные викторины в user_data.')
@@ -49,7 +51,8 @@ async def prepare_quiz_context(
 
 
 async def get_next_question_from_context(
-        context: ContextTypes.DEFAULT_TYPE) -> Union[Question, None]:
+    context: ContextTypes.DEFAULT_TYPE,
+) -> Union[Question, None]:
     """Извлекает следующий вопрос из контекста."""
 
     logger.info('Получение следующего вопроса из контекста.')

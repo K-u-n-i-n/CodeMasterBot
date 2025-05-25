@@ -40,10 +40,12 @@ async def get_or_create_user_settings(user: CustomUser) -> UserSettings:
     )
 
     settings, created = await sync_to_async(
-        UserSettings.objects.get_or_create)(user=user)
+        UserSettings.objects.get_or_create
+    )(user=user)
     if created:
         logger.info(
-            f'Создан новый объект UserSettings для пользователя {user.id}.')
+            f'Создан новый объект UserSettings для пользователя {user.id}.'
+        )
     return settings
 
 
@@ -65,7 +67,8 @@ async def update_user_topic(settings: UserSettings, tag_name: str) -> bool:
 
 
 async def get_user_settings(
-        user_id: int) -> Tuple[Union[UserSettings, dict], bool]:
+    user_id: int,
+) -> Tuple[Union[UserSettings, dict], bool]:
     """
     Возвращает настройки пользователя.
     Если пользователя нет в БД или в UserSettings,
@@ -84,7 +87,8 @@ async def get_user_settings(
 
     try:
         settings = await UserSettings.objects.select_related('tag').aget(
-            user=user)
+            user=user
+        )
         logger.info(f'Настройки для пользователя с ID {user_id} найдены')
         return settings, True
 
@@ -94,7 +98,8 @@ async def get_user_settings(
 
 
 async def get_random_questions_by_tag(
-        count: int, tag_slug: str) -> List[Question]:
+    count: int, tag_slug: str
+) -> List[Question]:
     """Получает случайные вопросы по указанному тегу."""
 
     logger.info(f'Получение случайных вопросов по тегу {tag_slug}.')
