@@ -28,10 +28,11 @@ jobs:
         run: |
           pip install ruff
           ruff check --config ruff_config/prod/pyproject.toml .
-          ruff format --check --config ruff_config/prod/pyproject.toml .
+          ruff format --check  --exit-non-zero-on-fixes --config ruff_config/prod/pyproject.toml .
 
   build_backend_and_push_to_docker_hub:
     name: Push Docker image to DockerHub
+    needs: [lint_and_test]
     runs-on: ubuntu-latest    
     steps:
       - name: Check out the repo        
@@ -52,6 +53,7 @@ jobs:
 
   build_bot_and_push_to_docker_hub:
     name: Push bot Docker image to DockerHub
+    needs: [lint_and_test]
     runs-on: ubuntu-latest    
     steps:
       - name: Check out the repo
@@ -72,6 +74,7 @@ jobs:
 
   build_gateway_and_push_to_docker_hub:
     name: Push gateway Docker image to DockerHub
+    needs: [lint_and_test]
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
@@ -92,7 +95,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs:      
+    needs:
       - build_backend_and_push_to_docker_hub
       - build_bot_and_push_to_docker_hub
       - build_gateway_and_push_to_docker_hub
