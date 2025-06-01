@@ -1,14 +1,15 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.11
-    hooks:      # Запуск линтера Ruff
+    rev: v0.11.12
+    hooks:
+      # Запуск линтера Ruff
       - id: ruff
         args: [--fix, --config=ruff_config/prod/pyproject.toml]
       # Запуск форматтера Ruff
       - id: ruff-format
         args: [--config=ruff_config/prod/pyproject.toml]
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.2.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
