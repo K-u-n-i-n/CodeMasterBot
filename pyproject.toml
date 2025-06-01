@@ -1,0 +1,180 @@
+# CodeMasterBot - Enterprise Configuration Management
+# Этот файл обеспечивает совместимость Dynaconf + Ruff + UV + будущих инструментов
+
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codemasterbot"
+version = "1.0.0"
+description = "Telegram Quiz Bot with Individual Settings"
+authors = [
+    {name = "Alexander Kunin", email = "k.u.n.i.n@yandex.ru"}
+]
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.12"
+keywords = ["telegram", "bot", "quiz", "django"]
+
+# Основные зависимости (для будущего управления через UV)
+dependencies = [
+    "django>=5.0.9",
+    "python-telegram-bot>=21.7",
+    "psycopg2-binary>=2.9.10",
+    "python-dotenv>=1.0.1",
+    # Enterprise configuration management
+    "dynaconf[toml]>=3.2.7",
+    "pydantic>=2.0.0",  # для валидации конфигурации
+]
+
+[project.optional-dependencies]
+# Development dependencies (для UV)
+dev = [
+    "ruff>=0.11.12",
+    "pre-commit>=4.2.0",
+    "pytest>=8.3.5",
+    "pytest-django>=4.9.0",
+    "pytest-asyncio>=0.26.0",
+    "pytest-cov>=6.1.1",
+]
+
+# Production dependencies
+prod = [
+    "gunicorn>=23.0.0",
+    "uvicorn>=0.32.0",
+    "sentry-sdk",  # для мониторинга
+]
+
+[project.urls]
+Homepage = "https://github.com/kuninav/CodeMasterBot"
+Repository = "https://github.com/kuninav/CodeMasterBot"
+Issues = "https://github.com/kuninav/CodeMasterBot/issues"
+
+# ============================================================================
+# DYNACONF CONFIGURATION (Enterprise Configuration Management)
+# ============================================================================
+[tool.dynaconf]
+# Основные настройки
+environments = true
+settings_files = [
+    "config/settings.toml",           # Общие настройки
+    "config/environments/local.toml", # Локальная разработка
+    "config/environments/test.toml",  # Тестовый сервер
+    "config/environments/production.toml", # Продакшен
+    "config/.secrets.toml",           # Локальные секреты (в .gitignore)
+]
+
+# Переменные окружения
+env_switcher = "ENV_FOR_DYNACONF"
+core_loaders = ["YAML", "TOML", "INI", "JSON", "PY"]
+
+# Валидация конфигурации
+validators = "config/schemas/validators.py"
+
+# Безопасность
+merge_enabled = true
+auto_cast = true
+
+# ============================================================================
+# RUFF CONFIGURATION (Code Quality)
+# ============================================================================
+[tool.ruff]
+# Наследуем настройки из специализированных конфигураций
+# В зависимости от окружения используется соответствующий ruff_config/
+extend = "ruff_config/dev/pyproject.toml"  # По умолчанию dev для разработки
+
+# Общие настройки для всех окружений
+line-length = 79
+target-version = "py312"
+
+# Исключаем новые папки с конфигурацией
+extend-exclude = [
+    "config/",
+    ".secrets.toml",
+]
+
+# ============================================================================
+# UV CONFIGURATION (Подготовка к будущему)
+# ============================================================================
+[tool.uv]
+# Настройки для будущего управления зависимостями через UV
+dev-dependencies = [
+    "ruff>=0.11.12",
+    "pre-commit>=4.2.0",
+    "pytest>=8.3.5",
+    "pytest-django>=4.9.0",
+    "pytest-asyncio>=0.26.0",
+    "pytest-cov>=6.1.1",
+]
+
+# ============================================================================
+# PYTEST CONFIGURATION (Тестирование)
+# ============================================================================
+[tool.pytest.ini_options]
+# Интеграция с Dynaconf для тестового окружения
+DJANGO_SETTINGS_MODULE = "backend.test_settings"
+ENV_FOR_DYNACONF = "local"  # Используем локальное окружение для тестов
+
+addopts = [
+    "--verbose",
+    "--tb=short",
+    "--strict-markers",
+    "--cov=backend",
+    "--cov-report=html:htmlcov",
+    "--cov-report=xml:coverage.xml",
+    "--cov-report=term-missing",
+    "--reuse-db",
+    "--nomigrations",
+]
+
+testpaths = ["backend/tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "smoke: Smoke tests",
+    "slow: Slow tests",
+]
+
+# ============================================================================
+# MYPY CONFIGURATION (Подготовка к будущему)
+# ============================================================================
+[tool.mypy]
+python_version = "3.12"
+check_untyped_defs = true
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+
+# ============================================================================
+# COVERAGE CONFIGURATION
+# ============================================================================
+[tool.coverage.run]
+source = ["backend"]
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+    "*/venv/*",
+    "*/config/*",
+    "manage.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+]
+
+# ============================================================================
+# PRE-COMMIT HOOKS (Интеграция с Dynaconf)
+# ============================================================================
+[tool.commitizen]
+version = "1.0.0"
+update_changelog_on_bump = true
