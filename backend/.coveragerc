@@ -1,0 +1,29 @@
+[run]
+source = bot
+branch = True
+
+[report]
+; Исключаем строки из покрытия
+exclude_also =
+    ; Не жалуемся на отладочный код:
+    def __repr__
+    if self\.debug
+
+    ; Не жалуемся на defensive assertions:
+    raise AssertionError
+    raise NotImplementedError
+
+    ; Не жалуемся на недостижимый код:
+    if 0:
+    if __name__ == .__main__.:
+
+    ; Абстрактные методы:
+    @(abc\.)?abstractmethod
+
+ignore_errors = True
+
+[xml]
+output = coverage.xml
+
+[html]
+directory = htmlcov
