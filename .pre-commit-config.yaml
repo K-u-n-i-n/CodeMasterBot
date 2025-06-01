@@ -8,12 +8,14 @@ repos:
       # Запуск форматтера Ruff
       - id: ruff-format
         args: [--config=ruff_config/prod/pyproject.toml]
+  # Проверка кода на соответствие PEP 8
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.2.0
+    # Предоставляет базовые хуки для проверки кода
     hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: check-yaml
-      - id: check-toml
-      - id: check-added-large-files
-      - id: detect-private-key
+      - id: trailing-whitespace  # Удаляет пробелы в конце строк
+      - id: end-of-file-fixer  # Удаляет пустые строки в конце файла
+      - id: check-yaml  # Проверяет синтаксис YAML файлов
+      - id: check-toml  # Проверяет синтаксис TOML файлов
+      - id: check-added-large-files  # Проверяет добавление больших файлов
+      - id: detect-private-key  # Обнаруживает приватные ключи в коде
