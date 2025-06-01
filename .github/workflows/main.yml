@@ -31,6 +31,7 @@ jobs:
 
       - name: Run tests
         run: |
+          cp .env.test backend/.env
           cd backend
           python -m pytest --tb=line --no-cov -q
         env:
