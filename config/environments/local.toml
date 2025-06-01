@@ -1,0 +1,39 @@
+# ============================================================================
+# LOCAL DEVELOPMENT ENVIRONMENT (SQLite + DEBUG)
+# ============================================================================
+# Настройки для локальной разработки с SQLite
+
+[default]
+# Django основные настройки
+DEBUG = true
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "*"]
+
+# База данных - SQLite для локальной разработки
+DATABASE_ENGINE = "django.db.backends.sqlite3"
+DATABASE_NAME = ":memory:"  # В памяти для быстрых тестов
+# DATABASE_NAME = "db.sqlite3"  # Раскомментировать для постоянной БД
+
+# Безопасность (для разработки)
+SECURE_HSTS_SECONDS = 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = false
+SECURE_HSTS_PRELOAD = false
+SECURE_SSL_REDIRECT = false
+SESSION_COOKIE_SECURE = false
+CSRF_COOKIE_SECURE = false
+
+# Кэширование (простое для разработки)
+CACHE_BACKEND = "django.core.cache.backends.locmem.LocMemCache"
+CACHE_LOCATION = "unique-snowflake"
+
+# Логирование (детальное для разработки)
+LOG_LEVEL = "DEBUG"
+
+# Telegram (локальная разработка)
+TELEGRAM_POLLING_ENABLED = true
+TELEGRAM_WEBHOOK_ENABLED = false
+
+# Email (консоль для разработки)
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+# Статика (для разработки)
+STATIC_ROOT = "staticfiles/"

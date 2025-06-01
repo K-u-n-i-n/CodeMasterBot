@@ -1,0 +1,51 @@
+# ============================================================================
+# TEST ENVIRONMENT (PostgreSQL + тестовый сервер)
+# ============================================================================
+# Настройки для тестового сервера (заглушка - сервер пока не настроен)
+
+[default]
+# Django основные настройки
+DEBUG = false
+ALLOWED_HOSTS = ["test.example.com", "localhost"]  # Заглушка
+
+# База данных - PostgreSQL на тестовом сервере
+DATABASE_ENGINE = "django.db.backends.postgresql"
+DATABASE_NAME = "codemaster_test"
+DATABASE_HOST = "localhost"  # Заглушка - будет изменено при настройке сервера
+DATABASE_PORT = "5432"
+# DATABASE_USER и DATABASE_PASSWORD - из переменных окружения TEST_*
+
+# Безопасность (средний уровень для тестов)
+SECURE_HSTS_SECONDS = 3600     # 1 час
+SECURE_HSTS_INCLUDE_SUBDOMAINS = false
+SECURE_HSTS_PRELOAD = false
+SECURE_SSL_REDIRECT = false     # Для тестирования
+SESSION_COOKIE_SECURE = false   # Зависит от HTTPS на тест сервере
+CSRF_COOKIE_SECURE = false      # Зависит от HTTPS на тест сервере
+
+# Кэширование (Redis если доступен, иначе локальная память)
+CACHE_BACKEND = "django_redis.cache.RedisCache"
+CACHE_LOCATION = "redis://127.0.0.1:6379/1"
+
+# Логирование (умеренное для тестов)
+LOG_LEVEL = "INFO"
+
+# Telegram (тестовый бот)
+TELEGRAM_POLLING_ENABLED = false
+TELEGRAM_WEBHOOK_ENABLED = true
+TELEGRAM_WEBHOOK_URL = "https://test.example.com/webhook/"  # Заглушка
+# TELEGRAM_TOKEN - из переменной окружения TEST_TELEGRAM_TOKEN
+
+# Email (реальная отправка или тестовый SMTP)
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = true
+# EMAIL_HOST_USER и EMAIL_HOST_PASSWORD - из переменных окружения
+
+# Статика
+STATIC_ROOT = "/app/staticfiles/"
+MEDIA_ROOT = "/app/media/"
+
+# Мониторинг (заглушки)
+# SENTRY_DSN - из переменной окружения TEST_SENTRY_DSN

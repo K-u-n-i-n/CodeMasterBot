@@ -1,0 +1,41 @@
+# ============================================================================
+# DYNACONF GENERAL SETTINGS (Enterprise Configuration Management)
+# ============================================================================
+# Общие настройки для всех окружений - НЕ КОНФИДЕНЦИАЛЬНЫЕ данные
+# Конфиденциальные данные должны быть в переменных окружения или .secrets.toml
+
+[default]
+# Базовые настройки приложения
+APP_NAME = "CodeMasterBot"
+APP_VERSION = "1.0.0"
+APP_DESCRIPTION = "Telegram бот для проведения викторин с индивидуальными настройками"
+
+# Настройки Django
+LANGUAGE_CODE = "ru-RU"
+TIME_ZONE = "Europe/Moscow"
+USE_I18N = true
+USE_TZ = true
+
+# Статические файлы
+STATIC_URL = "/static/"
+STATIC_ROOT = "/app/staticfiles/"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = "/app/media/"
+
+# Telegram Bot настройки (не секретные)
+TELEGRAM_WEBHOOK_ENABLED = false
+TELEGRAM_WEBHOOK_URL = ""
+
+# Логирование
+LOG_LEVEL = "INFO"
+LOG_FORMAT = "verbose"
+
+# Кэширование (общие настройки)
+CACHE_TTL = 300  # 5 минут по умолчанию
+
+# Безопасность (общие настройки)
+SESSION_COOKIE_AGE = 86400  # 24 часа
+CSRF_COOKIE_AGE = 86400     # 24 часа
+
+# Валидация конфигурации
+DYNACONF_VALIDATE = true

@@ -1,0 +1,57 @@
+# ============================================================================
+# PRODUCTION ENVIRONMENT (PostgreSQL + продакшен сервер)
+# ============================================================================
+# Настройки для продакшен сервера
+
+[default]
+# Django основные настройки
+DEBUG = false
+ALLOWED_HOSTS = []  # Будет заполнено из переменной окружения PROD_ALLOWED_HOSTS
+
+# База данных - PostgreSQL на продакшен сервере
+DATABASE_ENGINE = "django.db.backends.postgresql"
+DATABASE_NAME = "codemaster_prod"
+DATABASE_HOST = "localhost"
+DATABASE_PORT = "5432"
+# Все DATABASE_* секреты - только из переменных окружения PROD_*
+
+# Безопасность (максимальный уровень)
+SECURE_HSTS_SECONDS = 31536000  # 1 год
+SECURE_HSTS_INCLUDE_SUBDOMAINS = true
+SECURE_HSTS_PRELOAD = true
+SECURE_SSL_REDIRECT = true
+SESSION_COOKIE_SECURE = true
+CSRF_COOKIE_SECURE = true
+SESSION_COOKIE_HTTPONLY = true
+CSRF_COOKIE_HTTPONLY = true
+
+# Кэширование (Redis обязателен в продакшене)
+CACHE_BACKEND = "django_redis.cache.RedisCache"
+CACHE_LOCATION = "redis://127.0.0.1:6379/0"
+
+# Логирование (оптимизированное для продакшена)
+LOG_LEVEL = "WARNING"
+
+# Telegram (продакшен бот)
+TELEGRAM_POLLING_ENABLED = false
+TELEGRAM_WEBHOOK_ENABLED = true
+# TELEGRAM_WEBHOOK_URL и TELEGRAM_TOKEN - из переменных окружения PROD_*
+
+# Email (продакшен SMTP)
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = true
+# EMAIL_* секреты - из переменных окружения PROD_*
+
+# Статика
+STATIC_ROOT = "/app/staticfiles/"
+MEDIA_ROOT = "/app/media/"
+
+# Мониторинг и метрики
+# SENTRY_DSN - из переменной окружения PROD_SENTRY_DSN
+# Готовность к интеграции с Prometheus/Grafana
+
+# Производительность
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+SESSION_CACHE_ALIAS = "default"

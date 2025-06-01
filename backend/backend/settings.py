@@ -3,7 +3,58 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
+# ============================================================================
+# DYNACONF INTEGRATION (Enterprise Configuration Management)
+# ============================================================================
+# Поэтапная миграция на Dynaconf с fallback к существующим настройкам
+
+try:
+    from dynaconf import Dynaconf
+
+    # Настройка Dynaconf для чтения конфигурации
+    settings = Dynaconf(
+        envvar_prefix='DYNACONF',
+        environments=True,
+        settings_files=[
+            str(
+                Path(__file__).resolve().parent.parent.parent
+                / 'config'
+                / 'settings.toml'
+            ),
+            str(
+                Path(__file__).resolve().parent.parent.parent
+                / 'config'
+                / '.secrets.toml'
+            ),
+        ],
+        env_switcher='ENV_FOR_DYNACONF',
+        load_dotenv=True,  # Сохраняем совместимость с .env
+    )
+
+    # Функция для получения настройки с fallback
+    def get_config(key, default=None, env_var=None):
+        """Получить настройку из Dynaconf с fallback к переменным окружения"""
+        try:
+            return getattr(settings, key, os.getenv(env_var or key, default))
+        except AttributeError:
+            # settings объект недоступен
+            return os.getenv(env_var or key, default)
+
+    DYNACONF_ENABLED = True
+
+except ImportError:
+    # Fallback если Dynaconf не установлен
+    load_dotenv()
+
+    def get_config(key, default=None, env_var=None):
+        """Fallback к переменным окружения"""
+        return os.getenv(env_var or key, default)
+
+    DYNACONF_ENABLED = False
+
+# ============================================================================
+# DJANGO SETTINGS (с поддержкой Dynaconf)
+# ============================================================================
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
