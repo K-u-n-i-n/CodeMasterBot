@@ -154,3 +154,9 @@ media/
 # прочее
 questions_prod.csv
 ruff_config/personal/
+
+# Dynaconf секреты
+config/.secrets.toml
+config/**/.secrets.toml
+.secrets.toml
+*.secrets.toml
