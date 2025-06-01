@@ -32,7 +32,7 @@ jobs:
       - name: Run tests
         run: |
           cd backend
-          python -m pytest --tb=short --no-cov
+          python -m pytest --tb=short --cov-report= --cov=
         env:
           DJANGO_SETTINGS_MODULE: backend.test_settings
 
