@@ -4,9 +4,19 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # ============================================================================
-# DYNACONF INTEGRATION (Enterprise Configuration Management)
-# ============================================================================
 # Поэтапная миграция на Dynaconf с fallback к существующим настройкам
+# ============================================================================
+
+# DYNACONF INTEGRATION (Enterprise Configuration Management)
+
+# Настройка ALLOWED_HOSTS с резервным механизмом
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
+# CSRF_TRUSTED_ORIGINS - обработка пустой строки
+csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip() for origin in csrf_origins.split(',') if origin.strip()
+]
 
 try:
     from dynaconf import Dynaconf
@@ -70,7 +80,11 @@ TELEGRAM_FAKE_TOKEN = os.getenv('TELEGRAM_FAKE_TOKEN')
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
+# CSRF_TRUSTED_ORIGINS - обработка пустой строки
+csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip() for origin in csrf_origins.split(',') if origin.strip()
+]
 
 # Application definition
 
@@ -118,23 +132,51 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'postgres'),
-        'USER': os.getenv('POSTGRES_USER', 'postgres'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
-        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
-    }
-}
+# Используем Dynaconf для выбора БД (SQLite для локальной разработки)
+if DYNACONF_ENABLED:
+    # Читаем настройки БД из Dynaconf
+    db_engine = get_config('DATABASE_ENGINE', 'django.db.backends.sqlite3')
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
+    if db_engine == 'django.db.backends.sqlite3':
+        # SQLite для локальной разработки
+        db_name = get_config('DATABASE_NAME', BASE_DIR / 'db.sqlite3')
+        DATABASES = {
+            'default': {
+                'ENGINE': db_engine,
+                'NAME': db_name,
+            }
+        }
+    else:
+        # PostgreSQL для тестового/продакшен сервера
+        DATABASES = {
+            'default': {
+                'ENGINE': db_engine,
+                'NAME': get_config(
+                    'DATABASE_NAME', os.getenv('POSTGRES_DB', 'postgres')
+                ),
+                'USER': get_config(
+                    'DATABASE_USER', os.getenv('POSTGRES_USER', 'postgres')
+                ),
+                'PASSWORD': get_config(
+                    'DATABASE_PASSWORD',
+                    os.getenv('POSTGRES_PASSWORD', 'postgres'),
+                ),
+                'HOST': get_config(
+                    'DATABASE_HOST', os.getenv('POSTGRES_HOST', 'localhost')
+                ),
+                'PORT': get_config(
+                    'DATABASE_PORT', os.getenv('POSTGRES_PORT', '5432')
+                ),
+            }
+        }
+else:
+    # Fallback: если Dynaconf не работает, используем SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
