@@ -70,18 +70,24 @@ except ImportError:
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+SECRET_KEY = get_config('django_secret_key', env_var='DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG') == 'True'
+DEBUG = get_config('debug', 'False', env_var='DEBUG') == 'True'
 
-TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-TELEGRAM_FAKE_TOKEN = os.getenv('TELEGRAM_FAKE_TOKEN')
+TELEGRAM_TOKEN = get_config('telegram_token', env_var='TELEGRAM_TOKEN')
+TELEGRAM_FAKE_TOKEN = get_config(
+    'telegram_fake_token', env_var='TELEGRAM_FAKE_TOKEN'
+)
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = get_config(
+    'allowed_hosts', 'localhost,127.0.0.1', env_var='ALLOWED_HOSTS'
+).split(',')
 
 # CSRF_TRUSTED_ORIGINS - обработка пустой строки
-csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+csrf_origins = get_config(
+    'csrf_trusted_origins', '', env_var='CSRF_TRUSTED_ORIGINS'
+)
 CSRF_TRUSTED_ORIGINS = [
     origin.strip() for origin in csrf_origins.split(',') if origin.strip()
 ]
