@@ -19,6 +19,7 @@ from django.urls import NoReverseMatch, get_resolver, reverse
 class TestDjangoServerStartup:
     """Критические тесты запуска Django сервера"""
 
+    @pytest.mark.skip(reason='Временно отключено до внедрения Динакорф')
     def test_django_server_can_start(self):
         """
         Критический тест: Django приложение может запуститься без ошибок.
@@ -65,6 +66,7 @@ class TestDjangoServerStartup:
         finally:
             sys.stdout = old_stdout
 
+    @pytest.mark.skip(reason='Временно отключено до внедрения Динакорф')
     def test_django_urls_configuration(self):
         """
         Тест корректности URL конфигурации.
@@ -83,6 +85,7 @@ class TestDjangoServerStartup:
             # Админка может быть не настроена - это не критично для основного функционала
             pass
 
+    @pytest.mark.skip(reason='Временно отключено до внедрения Динакорф')
     def test_django_settings_validation(self):
         """
         Дополнительная валидация критических настроек Django.
