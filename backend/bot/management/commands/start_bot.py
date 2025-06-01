@@ -153,32 +153,38 @@ class Command(BaseCommand):
             utils.daily_task, interval=60, first=0, name='daily_task'
         )
 
-        # # Запуск Polling, если не используется Webhook
-        # async def delete_webhook():  # Функция для удаления Webhook
-        #     await application.bot.delete_webhook()
-        #     logger.info('Webhook удален!')
-        # application.run_polling()
+        # Запуск Polling, если не используется Webhook
+        async def delete_webhook():  # Функция для удаления Webhook
+            await application.bot.delete_webhook()
+            logger.info('Webhook удален!')
 
-        # Код для запуска бота в режиме Webhook
-        async def set_webhook():
-            if not WEBHOOK_URL:
-                logger.error('Ошибка: WEBHOOK_URL не установлен!')
-                return
-
-            try:
-                success = await application.bot.set_webhook(WEBHOOK_URL)
-                if success:
-                    logger.info(f'Webhook успешно установлен: {WEBHOOK_URL}')
-                else:
-                    logger.error('Ошибка при установке Webhook!')
-            except Exception as e:
-                logger.error(f'Ошибка Webhook: {e}')
-
+        # Создаем event loop и удаляем webhook перед polling
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        # Устанавливаем Webhook перед запуском
-        loop.run_until_complete(set_webhook())
+        loop.run_until_complete(delete_webhook())
 
-        application.run_webhook(
-            listen='0.0.0.0', port=8443, webhook_url=WEBHOOK_URL
-        )
+        application.run_polling()
+
+        # # Код для запуска бота в режиме Webhook
+        # async def set_webhook():
+        #     if not WEBHOOK_URL:
+        #         logger.error('Ошибка: WEBHOOK_URL не установлен!')
+        #         return
+
+        #     try:
+        #         success = await application.bot.set_webhook(WEBHOOK_URL)
+        #         if success:
+        #             logger.info(f'Webhook успешно установлен: {WEBHOOK_URL}')
+        #         else:
+        #             logger.error('Ошибка при установке Webhook!')
+        #     except Exception as e:
+        #         logger.error(f'Ошибка Webhook: {e}')
+
+        # loop = asyncio.new_event_loop()
+        # asyncio.set_event_loop(loop)
+        # # Устанавливаем Webhook перед запуском
+        # loop.run_until_complete(set_webhook())
+
+        # application.run_webhook(
+        #     listen='0.0.0.0', port=8443, webhook_url=WEBHOOK_URL
+        # )
