@@ -1,4 +1,4 @@
-pip-requirements
+# pip-requirements
 -r requirements.txt
 
 # Configuration management (already included in requirements.txt)

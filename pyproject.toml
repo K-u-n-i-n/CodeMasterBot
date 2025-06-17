@@ -159,7 +159,7 @@ source = ["backend"]
 omit = [
     "*/migrations/*",
     "*/tests/*",
-    "*/venv/*",
+    "*/.venv/*",
     "*/config/*",
     "manage.py",
 ]
